@@ -1,0 +1,40 @@
+volumes:
+  hkzf-fabric-data:
+    external: true
+
+services:
+  orderer.example.com:
+    environment:
+      - ORDERER_GENERAL_LOCALMSPDIR=/fabric/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/fabric/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/fabric/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/fabric/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/tls/ca.crt]
+      - ORDERER_GENERAL_CLUSTER_CLIENTCERTIFICATE=/fabric/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/tls/server.crt
+      - ORDERER_GENERAL_CLUSTER_CLIENTPRIVATEKEY=/fabric/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/tls/server.key
+      - ORDERER_GENERAL_CLUSTER_ROOTCAS=[/fabric/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/tls/ca.crt]
+      - ORDERER_ADMIN_TLS_CERTIFICATE=/fabric/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/tls/server.crt
+      - ORDERER_ADMIN_TLS_PRIVATEKEY=/fabric/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/tls/server.key
+      - ORDERER_ADMIN_TLS_ROOTCAS=[/fabric/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/tls/ca.crt]
+      - ORDERER_ADMIN_TLS_CLIENTROOTCAS=[/fabric/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/tls/ca.crt]
+    volumes:
+      - hkzf-fabric-data:/fabric:ro
+
+  peer0.org1.example.com:
+    environment:
+      - CORE_PEER_MSPCONFIGPATH=/fabric/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/msp
+      - CORE_PEER_TLS_ROOTCERT_FILE=/fabric/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt
+      - CORE_PEER_TLS_CERT_FILE=/fabric/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/server.crt
+      - CORE_PEER_TLS_KEY_FILE=/fabric/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/server.key
+    volumes:
+      - hkzf-fabric-data:/fabric:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  peer0.org2.example.com:
+    environment:
+      - CORE_PEER_MSPCONFIGPATH=/fabric/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/msp
+      - CORE_PEER_TLS_ROOTCERT_FILE=/fabric/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt
+      - CORE_PEER_TLS_CERT_FILE=/fabric/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/server.crt
+      - CORE_PEER_TLS_KEY_FILE=/fabric/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/server.key
+    volumes:
+      - hkzf-fabric-data:/fabric:ro
+      - /var/run/docker.sock:/var/run/docker.sock

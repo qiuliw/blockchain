@@ -33,8 +33,15 @@
             <input type="text" v-model="id" placeholder="18 位身份证号码" maxlength="18">
         </div>
 
-        <button class="btn btn-primary" @click="check" :disabled="!name || !id">提交认证</button>
-        <a href="house.html" class="btn btn-secondary">下一步：房产认证 →</a>
+        <div class="flow-actions">
+            <button class="btn btn-primary" @click="check" :disabled="!name || !id">提交认证</button>
+        </div>
+
+        <div class="flow-actions" style="margin-top:12px">
+            <a :href="prevUrl" class="btn btn-outline">← 返回上一步</a>
+            <span class="spacer"></span>
+            <a href="house.html" class="btn btn-secondary">下一步：房产认证 →</a>
+        </div>
 
         <div v-if="message" class="alert" :class="'alert-' + messageType">{{ message }}</div>
 
@@ -63,6 +70,7 @@ new Vue({
         message: '',
         messageType: 'info',
         result: null,
+        prevUrl: HKZF.prevStep(1),
         HKZF: HKZF
     },
     methods: {

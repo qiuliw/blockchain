@@ -35,6 +35,12 @@
 
         <button class="btn btn-primary btn-block" @click="upload" :disabled="!file">上传并存证</button>
 
+        <div class="flow-actions" style="margin-top:16px">
+            <a :href="prevUrl" class="btn btn-outline">← 返回上一步</a>
+            <span class="spacer"></span>
+            <a href="index.html" class="btn btn-secondary">完成，返回首页</a>
+        </div>
+
         <div v-if="message" class="alert" :class="'alert-' + messageType">{{ message }}</div>
     </div>
 
@@ -67,7 +73,8 @@ new Vue({
         hash: '',
         loading: false,
         message: '',
-        messageType: 'info'
+        messageType: 'info',
+        prevUrl: HKZF.prevStep(3)
     },
     methods: {
         onSelect: function (e) {

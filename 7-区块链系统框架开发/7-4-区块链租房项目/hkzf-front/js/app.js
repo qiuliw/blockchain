@@ -76,9 +76,24 @@ var HKZF = {
       var cls = 'step';
       if (flow[s.key]) cls += ' done';
       if (current === s.id) cls += ' active';
-      html += '<div class="' + cls + '"><div class="step-num">' + s.id + '</div><div class="step-label">' + s.label + '</div></div>';
+      var inner = '<div class="step-num">' + s.id + '</div><div class="step-label">' + s.label + '</div>';
+      if (current !== s.id) {
+        html += '<a class="' + cls + ' step-link" href="' + s.page + '">' + inner + '</a>';
+      } else {
+        html += '<div class="' + cls + '">' + inner + '</div>';
+      }
     }
     html += '</div>';
     return html;
+  },
+
+  prevStep: function (current) {
+    var map = { 1: 'index.html', 2: 'auth.html', 3: 'house.html' };
+    return map[current] || 'index.html';
+  },
+
+  nextStep: function (current) {
+    var map = { 1: 'house.html', 2: 'contract.html', 3: 'index.html' };
+    return map[current] || 'index.html';
   }
 };

@@ -14,12 +14,12 @@ spec:
         app: hkzf-api
     spec:
       hostAliases:
-        - ip: "192.168.58.1"
+        - ip: "172.17.0.1"
           hostnames:
             - "host.minikube.internal"
       containers:
         - name: hkzf-api
-          image: hkzf-api:local
+          image: hkzf-api:v6
           imagePullPolicy: Never
           ports:
             - containerPort: 8080

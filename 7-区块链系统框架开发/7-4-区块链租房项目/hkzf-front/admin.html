@@ -31,7 +31,11 @@
         <!-- 个人认证 CSV -->
         <div v-show="tab==='auth'">
             <div class="alert alert-info">
-                CSV 格式：身份证号, 姓名, 是否有不良记录(true/false)，每行一条
+                CSV 格式（无表头）：身份证号, 姓名, 是否有不良记录(true/false)，每行一条
+            </div>
+            <div class="sample-links">
+                <a href="samples/auth.csv" download>下载示例 auth.csv</a>
+                <a href="samples/README.md" target="_blank">查看测试说明</a>
             </div>
             <div class="upload-area">
                 <input type="file" accept=".csv" @change="onAuthFile">
@@ -42,7 +46,11 @@
         <!-- 房产 CSV -->
         <div v-show="tab==='house'">
             <div class="alert alert-info">
-                CSV 格式：房产证号, 身份证号, 是否可出租(true/false)，每行一条
+                CSV 格式（无表头）：房产证号, 身份证号, 是否可出租(true/false)，每行一条
+            </div>
+            <div class="sample-links">
+                <a href="samples/house.csv" download>下载示例 house.csv</a>
+                <a href="samples/README.md" target="_blank">查看测试说明</a>
             </div>
             <div class="upload-area">
                 <input type="file" accept=".csv" @change="onHouseFile">
@@ -55,10 +63,17 @@
             <div class="alert alert-info">
                 文件名（不含扩展名）作为合同编号，系统将计算 SHA256 并上链
             </div>
+            <div class="sample-links">
+                <a href="samples/HT2026001.pdf" download>下载示例 HT2026001.pdf</a>
+            </div>
             <div class="upload-area">
                 <input type="file" accept="image/jpeg,application/pdf" @change="onContractFile">
             </div>
             <button class="btn btn-primary" @click="uploadContract" :disabled="!contractForm">上传合同</button>
+        </div>
+
+        <div class="flow-actions" style="margin-top:20px">
+            <a href="index.html" class="btn btn-outline">← 返回首页</a>
         </div>
 
         <div v-if="message" class="alert" :class="'alert-' + messageType">{{ message }}</div>

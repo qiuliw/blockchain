@@ -119,6 +119,39 @@ a:hover { text-decoration: underline; }
 .step.active .step-label { color: var(--primary); font-weight: 600; }
 .step.done .step-label { color: var(--success); }
 
+.step-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.step-link:hover .step-num { transform: scale(1.05); }
+
+.flow-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.flow-actions .spacer { flex: 1; }
+
+.btn-outline {
+  background: #fff;
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.btn-outline:hover { background: var(--bg); }
+
+.sample-links { margin: 12px 0 16px; }
+.sample-links a {
+  display: inline-block;
+  margin-right: 16px;
+  font-size: 0.9rem;
+}
+
 .step:not(:last-child)::after {
   content: "";
   position: absolute;

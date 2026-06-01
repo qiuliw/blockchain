@@ -5,6 +5,15 @@ client:
   organization: Org1
   logging:
     level: info
+  peer:
+    timeout:
+      connection: 10s
+      queryResponse: 30s
+      executeTxResponse: 60s
+  orderer:
+    timeout:
+      connection: 10s
+      response: 30s
   cryptoconfig:
     path: /fabric/organizations
   BCCSP:
@@ -30,6 +39,11 @@ channels:
         chaincodeQuery: true
         ledgerQuery: true
         eventSource: true
+      peer0.org2.example.com:
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: false
 
 organizations:
   Org1:
@@ -37,6 +51,11 @@ organizations:
     cryptoPath: /app/fabric/msp
     peers:
       - peer0.org1.example.com
+  Org2:
+    mspid: Org2MSP
+    cryptoPath: /fabric/organizations/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp
+    peers:
+      - peer0.org2.example.com
 
 orderers:
   orderer.example.com:
@@ -54,3 +73,10 @@ peers:
       ssl-target-name-override: peer0.org1.example.com
     tlsCACerts:
       path: /app/fabric/peer-tls/ca.crt
+  peer0.org2.example.com:
+    url: grpcs://host.minikube.internal:9051
+    eventUrl: grpcs://host.minikube.internal:9051
+    grpcOptions:
+      ssl-target-name-override: peer0.org2.example.com
+    tlsCACerts:
+      path: /fabric/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt

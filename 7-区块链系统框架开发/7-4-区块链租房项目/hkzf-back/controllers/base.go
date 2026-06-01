@@ -2,16 +2,9 @@ package controllers
 
 import (
 	"github.com/astaxie/beego"
-
 	"github.com/astaxie/beego/context"
 )
 
-
-var userId=beego.AppConfig.String("user_id")
-
-/*
-	处理数据回复
- */
 func handleResponse(response *context.Response, code int, msg interface{}) {
 	if code >= 400 {
 		beego.Error(msg)
@@ -19,12 +12,9 @@ func handleResponse(response *context.Response, code int, msg interface{}) {
 		beego.Info(msg)
 	}
 	response.WriteHeader(code)
-	// 讲msg值进行一个类型的转换,如果转换成功ok(true)
-	b, ok := msg.([]byte)
-	if ok {
+	if b, ok := msg.([]byte); ok {
 		response.Write(b)
-	} else {
-		s := msg.(string)
-		response.Write([]byte(s))
+		return
 	}
+	response.Write([]byte(msg.(string)))
 }

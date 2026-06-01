@@ -1,17 +1,18 @@
 package controllers
 
 import (
-	"github.com/astaxie/beego"
-	"hkzf/models"
-	"path"
-	"time"
-	"github.com/astaxie/beego/toolbox"
-	"fmt"
-	"os"
 	"encoding/csv"
+	"fmt"
+	"hkzf/models"
 	"io"
+	"os"
+	"path"
 	"strconv"
 	"strings"
+	"time"
+
+	"github.com/astaxie/beego"
+	"github.com/astaxie/beego/toolbox"
 )
 
 type CertificationController struct {
@@ -19,134 +20,80 @@ type CertificationController struct {
 }
 
 func (this *CertificationController) Check() {
-	// 后端房屋认证
-
 	houseId := this.GetString("houseId")
 	id := this.GetString("id")
-
 	if houseId == "" || id == "" {
 		handleResponse(this.Ctx.ResponseWriter, 400, "Reqest parameter houseId(or id) can't be empty")
 		return
 	}
 
-	beego.Info(houseId + ":" + id)
-
-	var (
-		channelId   = beego.AppConfig.String("channel_id_fgj")
-		chainCodeId = beego.AppConfig.String("chaincode_id_house")
+	response, err := models.Query(
+		beego.AppConfig.String("chaincode_id_house"),
+		"check",
+		[][]byte{[]byte(houseId), []byte(id)},
 	)
-	ccs, err := models.Initialize(channelId, chainCodeId, userId, "CORE_OFGJ_CONFIG_FILE")
 	if err != nil {
 		handleResponse(this.Ctx.ResponseWriter, 500, err.Error())
 		return
 	}
-	defer ccs.Close()
-
-	var args [][]byte
-	args = append(args, []byte(houseId))
-	args = append(args, []byte(id))
-	response, err := ccs.ChainCodeQuery("check", args)
-
-	if err != nil {
-		handleResponse(this.Ctx.ResponseWriter, 500, err.Error())
-		return
-	}
-
 	handleResponse(this.Ctx.ResponseWriter, 200, response)
-
 }
 
 func (this *CertificationController) RecordHouse() {
-	var key = "house"
-	// 用于上传房屋记录信息
-	_, header, err := this.GetFile(key)
+	_, header, err := this.GetFile("house")
 	if err != nil {
 		handleResponse(this.Ctx.ResponseWriter, 400, err.Error())
 		return
 	}
 
 	fileName := header.Filename
-	beego.Info("文件名称:" + fileName)
-
-	err = this.SaveToFile(key, path.Join("static/upload", fileName))
-	if err != nil {
+	if err = this.SaveToFile("house", path.Join("static/upload", fileName)); err != nil {
 		handleResponse(this.Ctx.ResponseWriter, 500, err.Error())
 		return
 	}
 
-	// 开启任务
-	var myTask = "tk1"
 	t := time.Now().Add(5 * time.Second)
-	second := t.Second()
-	minute := t.Minute()
-	hour := t.Hour()
-	spec := fmt.Sprintf("%d %d %d * * *", second, minute, hour)
-	tk := toolbox.NewTask(myTask, spec, func() error {
+	spec := fmt.Sprintf("%d %d %d * * *", t.Second(), t.Minute(), t.Hour())
+	tk := toolbox.NewTask("house-import", spec, func() error {
 		defer toolbox.StopTask()
-		return myTask1(fileName)
+		return importHouseCSV(fileName)
 	})
-
-	toolbox.AddTask(myTask, tk)
+	toolbox.AddTask("house-import", tk)
 	toolbox.StartTask()
-
 	handleResponse(this.Ctx.ResponseWriter, 200, "ok")
 }
 
-func myTask1(fileName string) error {
-	var (
-		channelId   = beego.AppConfig.String("channel_id_fgj")
-		chainCodeId = beego.AppConfig.String("chaincode_id_house")
-	)
-
-	ccs, err := models.Initialize(channelId, chainCodeId, userId, "CORE_OFGJ_CONFIG_FILE")
+func importHouseCSV(fileName string) error {
+	chaincodeID := beego.AppConfig.String("chaincode_id_house")
+	file, err := os.Open(path.Join("static/upload", fileName))
 	if err != nil {
-		beego.Error(err.Error())
 		return err
 	}
-	defer ccs.Close()
+	defer file.Close()
 
-	file, _ := os.Open(path.Join("static/upload", fileName))
 	reader := csv.NewReader(file)
-
-	var line = 0
-	var lines []string
-
+	var badLines []string
+	line := 0
 	for {
-		line += 1
-		linestr := strconv.Itoa(line)
-
+		line++
 		record, err := reader.Read()
 		if err == io.EOF {
 			break
 		}
-		if err !=nil{
-			beego.Error(err.Error())
-			lines=append(lines,linestr)
+		if err != nil || len(record) != 3 {
+			badLines = append(badLines, strconv.Itoa(line))
 			continue
 		}
-
-		if len(record)!=3{
-			beego.Error(err.Error())
-			lines=append(lines,linestr)
-			continue
+		args := make([][]byte, len(record))
+		for i, v := range record {
+			args[i] = []byte(v)
 		}
-
-		var args [][]byte
-		for _, str := range record {
-			// 参数
-			args = append(args, []byte(str))
-		}
-		_, err = ccs.ChainCodeUpdate("add", args)
-		if err != nil {
-			beego.Error(err.Error())
-			lines=append(lines,linestr)
+		if _, err = models.Invoke(chaincodeID, "add", args); err != nil {
+			badLines = append(badLines, strconv.Itoa(line))
 		}
 	}
-
-	if len(lines)>0{
-		beego.Error("Error line:",strings.Join(lines,","))
-	}else{
-		beego.Info("write data success")
+	if len(badLines) > 0 {
+		beego.Error("house import failed lines:", strings.Join(badLines, ","))
 	}
 	return nil
 }
