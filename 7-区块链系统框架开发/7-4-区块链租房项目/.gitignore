@@ -1,0 +1,8 @@
+# Go vendor 目录（go mod vendor 生成，不纳入版本库）
+**/vendor/
+
+# Fabric 运行时生成的证书与通道文件
+deploy/fabric/
+
+# 临时文件
+/tmp/hkzf-*

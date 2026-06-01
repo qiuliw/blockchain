@@ -1,61 +1,102 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>个人认证</title>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>身份认证 - 链信租房</title>
+    <link rel="stylesheet" href="css/app.css">
     <script src="vue.js"></script>
     <script src="vue-resource.js"></script>
+    <script src="js/app.js"></script>
 </head>
 <body>
+<header class="site-header">
+    <div class="site-header-inner">
+        <a class="brand" href="index.html">链信租房<span>Blockchain Rental</span></a>
+        <nav class="nav-links" v-html="navHtml"></nav>
+    </div>
+</header>
 
-<div id="app">
+<div id="app" class="page" :class="{loading: loading}">
+    <div v-html="stepsHtml"></div>
 
-    <table>
-        <tr>
-            <td>姓名:</td>
-            <td><input type="text" v-model="name"></td>
-        </tr>
-        <tr>
-            <td>身份证:</td>
-            <td><input type="text" v-model="id"></td>
-        </tr>
-    </table>
+    <div class="card">
+        <h1>个人身份认证</h1>
+        <p class="subtitle">请输入姓名与身份证号，平台将查询公安链上数据进行核验</p>
 
-    <button v-on:click="check">认证</button>
+        <div class="form-group">
+            <label>姓名</label>
+            <input type="text" v-model="name" placeholder="请输入真实姓名">
+        </div>
+        <div class="form-group">
+            <label>身份证号</label>
+            <input type="text" v-model="id" placeholder="18 位身份证号码" maxlength="18">
+        </div>
 
+        <button class="btn btn-primary" @click="check" :disabled="!name || !id">提交认证</button>
+        <a href="house.html" class="btn btn-secondary">下一步：房产认证 →</a>
+
+        <div v-if="message" class="alert" :class="'alert-' + messageType">{{ message }}</div>
+
+        <div v-if="result" class="result-grid">
+            <div class="result-item">
+                <div class="label">身份匹配</div>
+                <div class="value" :class="result.first ? 'ok' : 'no'">{{ HKZF.boolLabel(result.first, '匹配', '不匹配') }}</div>
+            </div>
+            <div class="result-item">
+                <div class="label">不良记录</div>
+                <div class="value" :class="result.second ? 'no' : 'ok'">{{ result.second ? '存在' : '无' }}</div>
+            </div>
+        </div>
+    </div>
 </div>
 
-</body>
-
 <script>
-    var vm =new Vue({
-        el:'#app',
-        data:{
-            name:"张三",
-            id:"211004197001010000"
-        },
-        methods:{
-            check:function () {
-                var url="http://localhost:8080/auth"
-                var params={"name":this.name,"id":this.id}
+new Vue({
+    el: '#app',
+    data: {
+        navHtml: HKZF.renderNav('auth'),
+        stepsHtml: HKZF.renderSteps(1),
+        name: '张三',
+        id: '211004197001010000',
+        loading: false,
+        message: '',
+        messageType: 'info',
+        result: null,
+        HKZF: HKZF
+    },
+    methods: {
+        check: function () {
+            var self = this;
+            self.loading = true;
+            self.message = '';
+            self.result = null;
 
-                this.$http.get(
-                    url,
-                    // params,// 如果get请求这样传参数是存在问题的
-                    // get请求传递参数是下面的格式
-                    {params:params},
-                    {emulateJSON:true}
-                ).then(
-                    function (response) {
-                        console.log(response)
-                    },
-                    function (response) {
-                        console.log(response)
+            HKZF.apiGet(self, '/api/auth', { name: self.name, id: self.id }).then(
+                function (res) {
+                    self.loading = false;
+                    self.result = HKZF.parsePair(res.body);
+                    if (self.result.first && !self.result.second) {
+                        self.message = '身份认证通过，可进行房产认证';
+                        self.messageType = 'success';
+                        HKZF.saveFlow({ authDone: true, name: self.name, id: self.id });
+                        self.stepsHtml = HKZF.renderSteps(1);
+                    } else if (!self.result.first) {
+                        self.message = '链上未找到匹配的身份信息，请联系管理员导入数据';
+                        self.messageType = 'warning';
+                    } else {
+                        self.message = '存在不良个人记录，无法继续租房流程';
+                        self.messageType = 'error';
                     }
-                )
-            }
+                },
+                function (err) {
+                    self.loading = false;
+                    HKZF.handleError(self, err);
+                }
+            );
         }
-    });
+    }
+});
 </script>
+</body>
 </html>

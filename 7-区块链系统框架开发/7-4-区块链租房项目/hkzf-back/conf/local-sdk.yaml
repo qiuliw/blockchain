@@ -1,0 +1,56 @@
+name: hkzf-local
+version: 1.0.0
+
+client:
+  organization: Org1
+  logging:
+    level: info
+  cryptoconfig:
+    path: /fabric/organizations
+  BCCSP:
+    security:
+      enabled: true
+      default:
+        provider: SW
+      hashAlgorithm: SHA2
+      softVerify: true
+      level: 256
+  credentialStore:
+    path: /tmp/hfc-kvs
+    cryptoStore:
+      path: /tmp/msp
+
+channels:
+  mychannel:
+    orderers:
+      - orderer.example.com
+    peers:
+      peer0.org1.example.com:
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
+
+organizations:
+  Org1:
+    mspid: Org1MSP
+    cryptoPath: /app/fabric/msp
+    peers:
+      - peer0.org1.example.com
+
+orderers:
+  orderer.example.com:
+    url: grpcs://host.minikube.internal:7050
+    grpcOptions:
+      ssl-target-name-override: orderer.example.com
+    tlsCACerts:
+      path: /app/fabric/orderer-tls/ca.crt
+
+peers:
+  peer0.org1.example.com:
+    url: grpcs://host.minikube.internal:7051
+    eventUrl: grpcs://host.minikube.internal:7051
+    grpcOptions:
+      ssl-target-name-override: peer0.org1.example.com
+    tlsCACerts:
+      path: /app/fabric/peer-tls/ca.crt

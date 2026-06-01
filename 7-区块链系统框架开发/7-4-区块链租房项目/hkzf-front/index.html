@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>区块链租房平台</title>
+    <link rel="stylesheet" href="css/app.css">
+    <script src="vue.js"></script>
+    <script src="vue-resource.js"></script>
+    <script src="js/app.js"></script>
+</head>
+<body>
+<header class="site-header">
+    <div class="site-header-inner">
+        <a class="brand" href="index.html">链信租房<span>Blockchain Rental</span></a>
+        <nav class="nav-links" v-html="navHtml"></nav>
+    </div>
+</header>
+
+<div id="app" class="page">
+    <section class="hero">
+        <h1>安全可信的区块链租房平台</h1>
+        <p>基于 Hyperledger Fabric，完成身份核验、房产确权与合同上链存证，让租赁交易透明可追溯。</p>
+        <a href="auth.html" class="btn btn-primary">开始租房流程</a>
+    </section>
+
+    <div class="feature-grid">
+        <div class="feature-card">
+            <h3>① 身份认证</h3>
+            <p>对接公安链码，核验租客/房东姓名与身份证是否匹配，并查询是否有不良记录。</p>
+            <a href="auth.html" class="btn btn-primary">去认证</a>
+        </div>
+        <div class="feature-card">
+            <h3>② 房产认证</h3>
+            <p>对接房管链码，验证房产证号与持有人身份，确认房源是否具备出租资格。</p>
+            <a href="house.html" class="btn btn-primary">去认证</a>
+        </div>
+        <div class="feature-card">
+            <h3>③ 签约存证</h3>
+            <p>上传租赁合同，链上存储 SHA256 摘要，随时可查、不可篡改。</p>
+            <a href="contract.html" class="btn btn-primary">去签约</a>
+        </div>
+    </div>
+
+    <div class="card" style="margin-top:32px">
+        <h1>我的进度</h1>
+        <p class="subtitle">完成以下步骤即可发起正式租赁</p>
+        <div v-html="stepsHtml"></div>
+        <div class="result-grid">
+            <div class="result-item">
+                <div class="label">身份认证</div>
+                <div class="value" :class="flow.authDone ? 'ok' : 'no'">{{ flow.authDone ? '已完成' : '待完成' }}</div>
+            </div>
+            <div class="result-item">
+                <div class="label">房产认证</div>
+                <div class="value" :class="flow.houseDone ? 'ok' : 'no'">{{ flow.houseDone ? '已完成' : '待完成' }}</div>
+            </div>
+            <div class="result-item">
+                <div class="label">合同存证</div>
+                <div class="value" :class="flow.contractDone ? 'ok' : 'no'">{{ flow.contractDone ? '已完成' : '待完成' }}</div>
+            </div>
+        </div>
+        <button class="btn btn-secondary" style="margin-top:20px" @click="reset">重置进度</button>
+    </div>
+
+    <p class="footer-note">数据管理入口：<a href="admin.html">批量导入认证数据</a></p>
+</div>
+
+<script>
+new Vue({
+    el: '#app',
+    data: {
+        navHtml: HKZF.renderNav('index'),
+        stepsHtml: HKZF.renderSteps(0),
+        flow: HKZF.getFlow()
+    },
+    methods: {
+        reset: function () {
+            HKZF.resetFlow();
+            this.flow = {};
+            this.stepsHtml = HKZF.renderSteps(0);
+        }
+    }
+});
+</script>
+</body>
+</html>

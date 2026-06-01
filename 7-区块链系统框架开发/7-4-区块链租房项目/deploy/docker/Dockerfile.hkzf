@@ -1,0 +1,20 @@
+FROM golang:1.22-bookworm AS builder
+
+RUN apt-get update && apt-get install -y --no-install-recommends libltdl-dev && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /go/src/hkzf
+COPY hkzf-back/ ./
+
+ENV GOPATH=/go GO111MODULE=off CGO_ENABLED=1
+RUN go build -o /hkzf .
+
+FROM debian:bookworm-slim
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates libltdl7 && rm -rf /var/lib/apt/lists/*
+WORKDIR /app
+COPY --from=builder /hkzf /app/hkzf
+COPY hkzf-back/conf /app/conf
+COPY hkzf-back/static /app/static
+COPY hkzf-back/views /app/views
+RUN mkdir -p /app/static/upload /app/fabric
+EXPOSE 8080
+CMD ["/app/hkzf"]

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据管理 - 链信租房</title>
+    <link rel="stylesheet" href="css/app.css">
+    <script src="vue.js"></script>
+    <script src="vue-resource.js"></script>
+    <script src="js/app.js"></script>
+</head>
+<body>
+<header class="site-header">
+    <div class="site-header-inner">
+        <a class="brand" href="index.html">链信租房<span>Blockchain Rental</span></a>
+        <nav class="nav-links" v-html="navHtml"></nav>
+    </div>
+</header>
+
+<div id="app" class="page" :class="{loading: loading}">
+    <div class="card">
+        <h1>链上数据管理</h1>
+        <p class="subtitle">批量导入 CSV 认证数据或上传合同文件，供前台核验使用</p>
+
+        <div class="tabs">
+            <button class="tab" :class="{active: tab==='auth'}" @click="tab='auth'">个人认证数据</button>
+            <button class="tab" :class="{active: tab==='house'}" @click="tab='house'">房产认证数据</button>
+            <button class="tab" :class="{active: tab==='contract'}" @click="tab='contract'">合同文件</button>
+        </div>
+
+        <!-- 个人认证 CSV -->
+        <div v-show="tab==='auth'">
+            <div class="alert alert-info">
+                CSV 格式：身份证号, 姓名, 是否有不良记录(true/false)，每行一条
+            </div>
+            <div class="upload-area">
+                <input type="file" accept=".csv" @change="onAuthFile">
+            </div>
+            <button class="btn btn-primary" @click="uploadAuth" :disabled="!authForm">上传并写入链上</button>
+        </div>
+
+        <!-- 房产 CSV -->
+        <div v-show="tab==='house'">
+            <div class="alert alert-info">
+                CSV 格式：房产证号, 身份证号, 是否可出租(true/false)，每行一条
+            </div>
+            <div class="upload-area">
+                <input type="file" accept=".csv" @change="onHouseFile">
+            </div>
+            <button class="btn btn-primary" @click="uploadHouse" :disabled="!houseForm">上传并写入链上</button>
+        </div>
+
+        <!-- 合同 -->
+        <div v-show="tab==='contract'">
+            <div class="alert alert-info">
+                文件名（不含扩展名）作为合同编号，系统将计算 SHA256 并上链
+            </div>
+            <div class="upload-area">
+                <input type="file" accept="image/jpeg,application/pdf" @change="onContractFile">
+            </div>
+            <button class="btn btn-primary" @click="uploadContract" :disabled="!contractForm">上传合同</button>
+        </div>
+
+        <div v-if="message" class="alert" :class="'alert-' + messageType">{{ message }}</div>
+    </div>
+</div>
+
+<script>
+new Vue({
+    el: '#app',
+    data: {
+        navHtml: HKZF.renderNav('admin'),
+        tab: 'auth',
+        authForm: null,
+        houseForm: null,
+        contractForm: null,
+        loading: false,
+        message: '',
+        messageType: 'info'
+    },
+    methods: {
+        onAuthFile: function (e) {
+            if (!e.target.files.length) return;
+            this.authForm = new FormData();
+            this.authForm.append('auth', e.target.files[0]);
+            this.authForm.append('type', 'csv');
+        },
+        onHouseFile: function (e) {
+            if (!e.target.files.length) return;
+            this.houseForm = new FormData();
+            this.houseForm.append('house', e.target.files[0]);
+            this.houseForm.append('type', 'csv');
+        },
+        onContractFile: function (e) {
+            if (!e.target.files.length) return;
+            this.contractForm = new FormData();
+            this.contractForm.append('contract', e.target.files[0]);
+        },
+        uploadAuth: function () {
+            this._upload('/api/auth', this.authForm, '个人认证数据已接收，约 5 秒后写入链上');
+        },
+        uploadHouse: function () {
+            this._upload('/api/house', this.houseForm, '房产认证数据已接收，约 5 秒后写入链上');
+        },
+        uploadContract: function () {
+            this._upload('/api/contract', this.contractForm, '合同已成功上链存证');
+        },
+        _upload: function (url, form, okMsg) {
+            var self = this;
+            if (!form) return;
+            self.loading = true;
+            self.message = '';
+            HKZF.apiPostForm(self, url, form).then(
+                function () {
+                    self.loading = false;
+                    self.message = okMsg;
+                    self.messageType = 'success';
+                },
+                function (err) {
+                    self.loading = false;
+                    HKZF.handleError(self, err);
+                }
+            );
+        }
+    }
+});
+</script>
+</body>
+</html>

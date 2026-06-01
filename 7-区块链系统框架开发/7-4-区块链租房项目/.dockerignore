@@ -1,0 +1,3 @@
+deploy/fabric
+.git
+chaincode/vendor

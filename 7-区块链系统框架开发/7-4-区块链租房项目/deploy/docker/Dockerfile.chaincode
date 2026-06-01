@@ -1,0 +1,12 @@
+FROM hyperledger/fabric-ccenv:2.5.12 AS builder
+ARG CHAINCODE_DIR
+WORKDIR /src
+COPY chaincode/${CHAINCODE_DIR}/ ./
+RUN GO111MODULE=on go build -mod=vendor -o /tmp/chaincode .
+
+FROM hyperledger/fabric-baseos:2.5.12
+COPY --from=builder /tmp/chaincode /chaincode/chaincode
+ENV CHAINCODE_SERVER_ADDRESS=0.0.0.0:7052
+ENV CHAINCODE_TLS_DISABLED=true
+EXPOSE 7052
+CMD ["/chaincode/chaincode"]

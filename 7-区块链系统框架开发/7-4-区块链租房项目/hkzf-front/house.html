@@ -1,61 +1,108 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>房屋认证</title>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>房产认证 - 链信租房</title>
+    <link rel="stylesheet" href="css/app.css">
     <script src="vue.js"></script>
     <script src="vue-resource.js"></script>
+    <script src="js/app.js"></script>
 </head>
 <body>
+<header class="site-header">
+    <div class="site-header-inner">
+        <a class="brand" href="index.html">链信租房<span>Blockchain Rental</span></a>
+        <nav class="nav-links" v-html="navHtml"></nav>
+    </div>
+</header>
 
-<div id="app">
+<div id="app" class="page" :class="{loading: loading}">
+    <div v-html="stepsHtml"></div>
 
-    <table>
-        <tr>
-            <td>房产证号:</td>
-            <td><input type="text" v-model="houseId"></td>
-        </tr>
-        <tr>
-            <td>身份证:</td>
-            <td><input type="text" v-model="id"></td>
-        </tr>
-    </table>
+    <div class="card">
+        <h1>房产认证</h1>
+        <p class="subtitle">验证房产证号与持有人身份，确认房源是否具备出租资格</p>
 
-    <button v-on:click="check">认证</button>
+        <div v-if="flow.name" class="alert alert-info">
+            当前认证用户：{{ flow.name }}（{{ flow.id }}）
+        </div>
 
+        <div class="form-group">
+            <label>房产证号</label>
+            <input type="text" v-model="houseId" placeholder="请输入房产证编号">
+        </div>
+        <div class="form-group">
+            <label>持有人身份证号</label>
+            <input type="text" v-model="id" placeholder="18 位身份证号码" maxlength="18">
+        </div>
+
+        <button class="btn btn-primary" @click="check" :disabled="!houseId || !id">提交认证</button>
+        <a href="contract.html" class="btn btn-secondary">下一步：签约存证 →</a>
+
+        <div v-if="message" class="alert" :class="'alert-' + messageType">{{ message }}</div>
+
+        <div v-if="result" class="result-grid">
+            <div class="result-item">
+                <div class="label">产权人匹配</div>
+                <div class="value" :class="result.first ? 'ok' : 'no'">{{ HKZF.boolLabel(result.first, '匹配', '不匹配') }}</div>
+            </div>
+            <div class="result-item">
+                <div class="label">可出租</div>
+                <div class="value" :class="result.second ? 'ok' : 'no'">{{ HKZF.boolLabel(result.second, '是', '否') }}</div>
+            </div>
+        </div>
+    </div>
 </div>
 
-</body>
-
 <script>
-    var vm =new Vue({
-        el:'#app',
-        data:{
-            houseId:"1111112222223333333000000000",
-            id:"211004197001010000"
-        },
-        methods:{
-            check:function () {
-                var url="http://localhost:8080/house"
-                var params={"houseId":this.houseId,"id":this.id}
+var flow = HKZF.getFlow();
+new Vue({
+    el: '#app',
+    data: {
+        navHtml: HKZF.renderNav('house'),
+        stepsHtml: HKZF.renderSteps(2),
+        flow: flow,
+        houseId: '1111112222223333333000000000',
+        id: flow.id || '211004197001010000',
+        loading: false,
+        message: '',
+        messageType: 'info',
+        result: null,
+        HKZF: HKZF
+    },
+    methods: {
+        check: function () {
+            var self = this;
+            self.loading = true;
+            self.message = '';
+            self.result = null;
 
-                this.$http.get(
-                    url,
-                    // params,// 如果get请求这样传参数是存在问题的
-                    // get请求传递参数是下面的格式
-                    {params:params},
-                    {emulateJSON:true}
-                ).then(
-                    function (response) {
-                        console.log(response)
-                    },
-                    function (response) {
-                        console.log(response)
+            HKZF.apiGet(self, '/api/house', { houseId: self.houseId, id: self.id }).then(
+                function (res) {
+                    self.loading = false;
+                    self.result = HKZF.parsePair(res.body);
+                    if (self.result.first && self.result.second) {
+                        self.message = '房产认证通过，房源可出租，请继续签约存证';
+                        self.messageType = 'success';
+                        HKZF.saveFlow({ houseDone: true, houseId: self.houseId });
+                        self.stepsHtml = HKZF.renderSteps(2);
+                    } else if (!self.result.first) {
+                        self.message = '产权人与身份证不匹配，或链上无该房产记录';
+                        self.messageType = 'warning';
+                    } else {
+                        self.message = '该房产暂不具备出租资格';
+                        self.messageType = 'error';
                     }
-                )
-            }
+                },
+                function (err) {
+                    self.loading = false;
+                    HKZF.handleError(self, err);
+                }
+            );
         }
-    });
+    }
+});
 </script>
+</body>
 </html>
