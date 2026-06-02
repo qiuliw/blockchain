@@ -1,0 +1,85 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: orderer
+  namespace: fabric
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: orderer
+  template:
+    metadata:
+      labels:
+        app: orderer
+    spec:
+      containers:
+        - name: orderer
+          image: hyperledger/fabric-orderer:2.5.12
+          ports:
+            - containerPort: 7050
+            - containerPort: 7053
+          env:
+            - name: FABRIC_LOGGING_SPEC
+              value: INFO
+            - name: ORDERER_GENERAL_LISTENADDRESS
+              value: "0.0.0.0"
+            - name: ORDERER_GENERAL_LISTENPORT
+              value: "7050"
+            - name: ORDERER_GENERAL_LOCALMSPID
+              value: OrdererMSP
+            - name: ORDERER_GENERAL_LOCALMSPDIR
+              value: /fabric/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp
+            - name: ORDERER_GENERAL_TLS_ENABLED
+              value: "true"
+            - name: ORDERER_GENERAL_TLS_PRIVATEKEY
+              value: /fabric/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/tls/server.key
+            - name: ORDERER_GENERAL_TLS_CERTIFICATE
+              value: /fabric/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/tls/server.crt
+            - name: ORDERER_GENERAL_TLS_ROOTCAS
+              value: "[/fabric/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/tls/ca.crt]"
+            - name: ORDERER_GENERAL_CLUSTER_CLIENTCERTIFICATE
+              value: /fabric/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/tls/server.crt
+            - name: ORDERER_GENERAL_CLUSTER_CLIENTPRIVATEKEY
+              value: /fabric/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/tls/server.key
+            - name: ORDERER_GENERAL_CLUSTER_ROOTCAS
+              value: "[/fabric/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/tls/ca.crt]"
+            - name: ORDERER_GENERAL_BOOTSTRAPMETHOD
+              value: none
+            - name: ORDERER_CHANNELPARTICIPATION_ENABLED
+              value: "true"
+            - name: ORDERER_ADMIN_TLS_ENABLED
+              value: "true"
+            - name: ORDERER_ADMIN_TLS_CERTIFICATE
+              value: /fabric/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/tls/server.crt
+            - name: ORDERER_ADMIN_TLS_PRIVATEKEY
+              value: /fabric/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/tls/server.key
+            - name: ORDERER_ADMIN_TLS_ROOTCAS
+              value: "[/fabric/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/tls/ca.crt]"
+            - name: ORDERER_ADMIN_TLS_CLIENTROOTCAS
+              value: "[/fabric/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/tls/ca.crt]"
+            - name: ORDERER_ADMIN_LISTENADDRESS
+              value: "0.0.0.0:7053"
+          volumeMounts:
+            - name: fabric-data
+              mountPath: /fabric
+      volumes:
+        - name: fabric-data
+          persistentVolumeClaim:
+            claimName: fabric-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: orderer
+  namespace: fabric
+spec:
+  selector:
+    app: orderer
+  ports:
+    - name: grpc
+      port: 7050
+      targetPort: 7050
+    - name: admin
+      port: 7053
+      targetPort: 7053

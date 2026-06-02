@@ -1,16 +1,9 @@
 #!/usr/bin/env bash
-# HKZF 唯一部署入口：Fabric (Docker) + 链码 + minikube (K8s 应用)
+# HKZF 部署入口：链 (fabric ns) 与业务 (hkzf ns) 分离，全 K8s
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")" && pwd)"
 DEPLOY="$ROOT/deploy"
-FABRIC="$DEPLOY/fabric"
-VOL="${FABRIC_VOLUME:-hkzf-fabric-data}"
-
-ORGS_K8S="/fabric/organizations"
-MSP_K8S="/fabric/organizations/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp"
-PEER_TLS_K8S="/fabric/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls"
-ORDERER_TLS_K8S="/fabric/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/tls"
 
 log() { echo "[deploy] $*"; }
 
@@ -18,108 +11,73 @@ usage() {
   cat <<EOF
 用法: $0 [命令]
 
-  up      全栈部署（Fabric + 链码 + minikube + 应用），默认命令
-  app     仅重建并发布应用（Fabric 已在运行时）
+  up      全栈：minikube + 链 + 业务（默认）
+  chain   仅部署 Fabric 网络与链码（namespace: fabric）
+  app     仅部署业务应用（namespace: hkzf，需 chain 已就绪）
   stop    停止 localhost port-forward
 
 示例:
-  $0
-  $0 app
-  $0 stop
+  $0 chain && $0 app
+  $0 up
 EOF
 }
 
-sync_fabric_certs() {
-  if [ ! -f "$FABRIC/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt" ]; then
-    log "sync fabric certs: volume ${VOL} -> ${FABRIC}"
-    mkdir -p "$FABRIC/organizations"
-    rm -rf "$FABRIC/organizations"/*
-    docker run --rm -v "${VOL}:/fabric" hyperledger/fabric-tools:2.5.12 \
-      sh -c 'tar -C /fabric/organizations -cf - .' | tar -xf - -C "$FABRIC/organizations"
+ensure_minikube() {
+  if ! minikube status >/dev/null 2>&1; then
+    log "start minikube"
+    minikube start --driver=docker --cpus=4 --memory=6144
   fi
-}
-
-ensure_minikube_mount() {
-  if minikube ssh -- "test -d /fabric/organizations/peerOrganizations/org1.example.com" 2>/dev/null; then
-    return
-  fi
-  log "restart minikube with fabric mount"
-  minikube stop
-  minikube start --driver=docker --cpus=2 --memory=4096 \
-    --mount-string "${FABRIC}:/fabric" --mount
+  eval "$(minikube docker-env)"
 }
 
 build_app_images() {
-  eval "$(minikube docker-env)"
   bash "$DEPLOY/scripts/build-images.sh" app
 }
 
-apply_k8s() {
-  kubectl apply -f "$DEPLOY/k8s/namespace.yaml"
-  sed \
-    -e "s|FABRIC_ORGS_HOST_PATH|$ORGS_K8S|g" \
-    -e "s|FABRIC_MSP_HOST_PATH|$MSP_K8S|g" \
-    -e "s|FABRIC_PEER_TLS_HOST_PATH|$PEER_TLS_K8S|g" \
-    -e "s|FABRIC_ORDERER_TLS_HOST_PATH|$ORDERER_TLS_K8S|g" \
-    "$DEPLOY/k8s/hkzf-api.yaml" | kubectl apply -f -
-  kubectl apply -f "$DEPLOY/k8s/hkzf-web.yaml"
+apply_app() {
+  bash "$DEPLOY/scripts/sync-app-fabric-certs.sh"
+  kubectl apply -f "$DEPLOY/k8s/app/namespace.yaml"
+  kubectl apply -f "$DEPLOY/k8s/app/hkzf-api.yaml"
+  kubectl apply -f "$DEPLOY/k8s/app/hkzf-web.yaml"
 }
 
-wait_rollout() {
+wait_app() {
   kubectl -n hkzf rollout status deployment/hkzf-api --timeout=180s
   kubectl -n hkzf rollout status deployment/hkzf-web --timeout=120s
 }
 
-cmd_up() {
-  log "启动 Fabric (Docker)"
-  cd "$DEPLOY"
-  chmod +x scripts/*.sh
-  docker rm -f orderer.example.com peer0.org1.example.com peer0.org2.example.com fabric-bootstrap fabric-crypto 2>/dev/null || true
-  docker compose up fabric-crypto
-  docker compose up -d orderer.example.com peer0.org1.example.com peer0.org2.example.com
-  sleep 8
-  docker compose up fabric-bootstrap
-
-  log "部署链码 (CCAAS)"
-  bash "$DEPLOY/scripts/deploy-chaincode.sh"
-
-  log "启动 minikube"
-  minikube stop 2>/dev/null || true
-  minikube start --driver=docker --cpus=2 --memory=4096 \
-    --mount-string "$FABRIC:/fabric" --mount 2>/dev/null || \
-  minikube start --driver=docker --cpus=2 --memory=4096
-
-  sync_fabric_certs
-  build_app_images
-  apply_k8s
-  wait_rollout
-
-  bash "$DEPLOY/scripts/port-forward-local.sh" start
-
-  IP="$(minikube ip)"
-  echo ""
-  echo "=========================================="
-  echo " HKZF 已部署 (minikube)"
-  echo " 访问: http://127.0.0.1:30888/auth.html"
-  echo " NodePort: http://${IP}:30888/auth.html"
-  echo " Fabric peer: host.minikube.internal:7051"
-  echo "=========================================="
+cmd_chain() {
+  ensure_minikube
+  chmod +x "$DEPLOY/scripts/"*.sh
+  bash "$DEPLOY/scripts/deploy-fabric-k8s.sh"
+  bash "$DEPLOY/scripts/deploy-chaincode-k8s.sh"
+  log "chain layer ready (namespace fabric)"
 }
 
 cmd_app() {
-  sync_fabric_certs
-  ensure_minikube_mount
+  ensure_minikube
   build_app_images
-  apply_k8s
+  apply_app
   kubectl -n hkzf delete pod -l app=hkzf-api --force --grace-period=0 2>/dev/null || true
-  wait_rollout
+  wait_app
   bash "$DEPLOY/scripts/port-forward-local.sh" start
-
   log "verify"
   kubectl exec -n hkzf deploy/hkzf-web -- wget -qO- \
     "http://hkzf-api:8080/auth?name=%E5%BC%A0%E4%B8%89&id=211004197001010000" || true
   echo ""
   echo "访问: http://127.0.0.1:30888/auth.html"
+}
+
+cmd_up() {
+  cmd_chain
+  cmd_app
+  echo ""
+  echo "=========================================="
+  echo " HKZF 全 K8s 已部署"
+  echo " 链:   namespace fabric"
+  echo " 业务: namespace hkzf"
+  echo " 访问: http://127.0.0.1:30888/auth.html"
+  echo "=========================================="
 }
 
 cmd_stop() {
@@ -129,6 +87,7 @@ cmd_stop() {
 main() {
   case "${1:-up}" in
     up) cmd_up ;;
+    chain) cmd_chain ;;
     app) cmd_app ;;
     stop) cmd_stop ;;
     -h|--help|help) usage ;;

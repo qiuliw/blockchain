@@ -1,11 +1,12 @@
-# Fabric 运行时生成的证书与通道文件
-deploy/fabric/
+# Fabric 运行时生成内容
+deploy/fabric/organizations/
+deploy/fabric/channel-artifacts/
 
-# 链码安装包（部署时生成）
+# 链码安装包
 deploy/chaincode-pkgs/
 deploy/.chaincode-pkgs/
 
-# 旧 fabric-sdk-go 证书（minikube 改由 deploy/fabric 挂载，不再使用）
+# 旧 fabric-sdk-go 证书
 hkzf-back/conf/crypto/
 
 # Go 构建产物
@@ -13,11 +14,11 @@ hkzf-back/bin/
 hkzf-back/hkzf-api
 **/vendor/
 
-# 运行时上传的 CSV（保留目录结构见 static/upload/.gitkeep）
+# 运行时上传
 hkzf-back/static/upload/*
 !hkzf-back/static/upload/.gitkeep
 
-# 本地 IDE / 测试缓存
+# IDE / 测试
 .idea/
 .vscode/
 *.swp

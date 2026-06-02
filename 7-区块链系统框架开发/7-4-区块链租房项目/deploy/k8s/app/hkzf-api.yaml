@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hkzf-api
+  namespace: hkzf
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hkzf-api
+  template:
+    metadata:
+      labels:
+        app: hkzf-api
+    spec:
+      initContainers:
+        - name: unpack-fabric-certs
+          image: debian:bookworm-slim
+          imagePullPolicy: Never
+          command:
+            - sh
+            - -c
+            - |
+              mkdir -p /app/fabric/msp /app/fabric/peer-tls /app/fabric/orderer-tls
+              tar -xf /secrets/msp/msp.tar -C /app/fabric
+              tar -xf /secrets/peer/peer-tls.tar -C /app/fabric
+              tar -xf /secrets/orderer/orderer-tls.tar -C /app/fabric
+          volumeMounts:
+            - name: fabric-msp-bundle
+              mountPath: /secrets/msp
+            - name: fabric-peer-tls-bundle
+              mountPath: /secrets/peer
+            - name: fabric-orderer-tls-bundle
+              mountPath: /secrets/orderer
+            - name: fabric-runtime
+              mountPath: /app/fabric
+      containers:
+        - name: hkzf-api
+          image: hkzf-api:local
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - name: fabric-runtime
+              mountPath: /app/fabric
+      volumes:
+        - name: fabric-msp-bundle
+          secret:
+            secretName: fabric-msp-bundle
+        - name: fabric-peer-tls-bundle
+          secret:
+            secretName: fabric-peer-tls-bundle
+        - name: fabric-orderer-tls-bundle
+          secret:
+            secretName: fabric-orderer-tls-bundle
+        - name: fabric-runtime
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hkzf-api
+  namespace: hkzf
+spec:
+  type: ClusterIP
+  selector:
+    app: hkzf-api
+  ports:
+    - port: 8080
+      targetPort: 8080
