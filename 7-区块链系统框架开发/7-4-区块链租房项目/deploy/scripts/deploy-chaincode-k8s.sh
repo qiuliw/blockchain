@@ -45,23 +45,8 @@ peer_exec() {
   "
 }
 
-setup_peer_host_aliases() {
-  local org1_ip org2_ip
-  org1_ip="$(kubectl -n "$NS" get svc peer0-org1 -o jsonpath='{.spec.clusterIP}')"
-  org2_ip="$(kubectl -n "$NS" get svc peer0-org2 -o jsonpath='{.spec.clusterIP}')"
-  kubectl -n "$NS" exec "deploy/peer0-org1" -- sh -c "
-    grep -q 'peer0.org1.example.com' /etc/hosts || echo '${org1_ip} peer0.org1.example.com' >> /etc/hosts
-    grep -q 'peer0.org2.example.com' /etc/hosts || echo '${org2_ip} peer0.org2.example.com' >> /etc/hosts
-  "
-  kubectl -n "$NS" exec "deploy/peer0-org2" -- sh -c "
-    grep -q 'peer0.org1.example.com' /etc/hosts || echo '${org1_ip} peer0.org1.example.com' >> /etc/hosts
-    grep -q 'peer0.org2.example.com' /etc/hosts || echo '${org2_ip} peer0.org2.example.com' >> /etc/hosts
-  "
-}
-
 commit_chaincode() {
   local name=$1
-  setup_peer_host_aliases
   kubectl -n "$NS" exec "deploy/peer0-org1" -- sh -c "
     export CORE_PEER_LOCALMSPID='Org1MSP'
     export CORE_PEER_ADDRESS='peer0.org1.example.com:7051'

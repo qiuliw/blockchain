@@ -65,11 +65,37 @@ EOF
   kubectl -n "$NS" wait --for=condition=complete job/fabric-crypto --timeout=180s
 }
 
+channel_joined() {
+  kubectl -n "$NS" exec deploy/peer0-org1 -- sh -c '
+    export CORE_PEER_LOCALMSPID=Org1MSP CORE_PEER_ADDRESS=peer0-org1:7051 CORE_PEER_TLS_ENABLED=true
+    export CORE_PEER_TLS_ROOTCERT_FILE=/fabric/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt
+    export CORE_PEER_MSPCONFIGPATH=/fabric/organizations/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp
+    export CORE_PEER_TLS_SERVERHOSTOVERRIDE=peer0.org1.example.com
+    peer channel list 2>/dev/null
+  ' | grep -q "${CHANNEL_NAME}"
+}
+
+apply_fabric_host_aliases() {
+  local orderer_ip org1_ip org2_ip host_aliases
+  orderer_ip="$(kubectl -n "$NS" get svc orderer -o jsonpath='{.spec.clusterIP}')"
+  org1_ip="$(kubectl -n "$NS" get svc peer0-org1 -o jsonpath='{.spec.clusterIP}')"
+  org2_ip="$(kubectl -n "$NS" get svc peer0-org2 -o jsonpath='{.spec.clusterIP}')"
+  host_aliases=$(cat <<EOF
+[{"ip":"${orderer_ip}","hostnames":["orderer.example.com"]},{"ip":"${org1_ip}","hostnames":["peer0.org1.example.com"]},{"ip":"${org2_ip}","hostnames":["peer0.org2.example.com"]}]
+EOF
+)
+  for dep in orderer peer0-org1 peer0-org2; do
+    log "patch ${dep} hostAliases"
+    kubectl -n "$NS" patch deployment "$dep" --type=merge \
+      -p "{\"spec\":{\"template\":{\"spec\":{\"hostAliases\":${host_aliases}}}}}"
+  done
+  kubectl -n "$NS" rollout status deployment/orderer --timeout=180s
+  kubectl -n "$NS" rollout status deployment/peer0-org1 --timeout=180s
+  kubectl -n "$NS" rollout status deployment/peer0-org2 --timeout=180s
+}
+
 run_bootstrap_job() {
-  if kubectl -n "$NS" run "bootstrap-check-$RANDOM" --rm -i --restart=Never \
-    --image=hyperledger/fabric-tools:2.5.12 \
-    --overrides='{"spec":{"containers":[{"name":"bootstrap-check","image":"hyperledger/fabric-tools:2.5.12","env":[{"name":"CORE_PEER_LOCALMSPID","value":"Org1MSP"},{"name":"CORE_PEER_ADDRESS","value":"peer0-org1:7051"},{"name":"CORE_PEER_TLS_ENABLED","value":"true"},{"name":"CORE_PEER_TLS_ROOTCERT_FILE","value":"/fabric/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt"},{"name":"CORE_PEER_MSPCONFIGPATH","value":"/fabric/organizations/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp"}],"volumeMounts":[{"name":"fabric-data","mountPath":"/fabric"}]}],"volumes":[{"name":"fabric-data","persistentVolumeClaim":{"claimName":"fabric-data"}}]}}' \
-    --command -- peer channel list 2>/dev/null | grep -q "${CHANNEL_NAME}"; then
+  if channel_joined; then
     log "peers already joined ${CHANNEL_NAME}, skip bootstrap"
     return
   fi
@@ -135,9 +161,9 @@ main() {
   kubectl -n "$NS" rollout status deployment/peer0-org1 --timeout=180s
   kubectl -n "$NS" rollout status deployment/peer0-org2 --timeout=180s
 
-  bash "$DEPLOY/scripts/patch-fabric-hosts.sh"
+  apply_fabric_host_aliases
 
-  sleep 5
+  sleep 3
   run_bootstrap_job
   log "fabric network ready in namespace ${NS}"
 }

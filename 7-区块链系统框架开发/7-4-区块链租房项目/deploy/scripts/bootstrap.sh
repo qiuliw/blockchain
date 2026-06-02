@@ -1,29 +1,17 @@
 #!/usr/bin/env bash
+# K8s Job：创建通道并让 peer 加入（证书由 fabric-crypto Job 预先生成）
 set -euo pipefail
 
 FABRIC_ROOT=/fabric
-CHAINCODE_ROOT=/chaincode
 CHANNEL_NAME="${CHANNEL_NAME:-mychannel}"
 CONFIGTX_PATH="${FABRIC_ROOT}/configtx"
 export FABRIC_CFG_PATH=/etc/hyperledger/fabric
 
-ORDERER_CA="${FABRIC_ROOT}/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem"
 ORDERER_ADMIN_TLS="${FABRIC_ROOT}/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/tls/ca.crt"
 ORDERER_ADMIN_TLS_CERT="${FABRIC_ROOT}/organizations/ordererOrganizations/example.com/users/Admin@example.com/tls/client.crt"
 ORDERER_ADMIN_TLS_KEY="${FABRIC_ROOT}/organizations/ordererOrganizations/example.com/users/Admin@example.com/tls/client.key"
 
 log() { echo "[bootstrap] $*"; }
-
-generate_crypto() {
-  if [ -d "${FABRIC_ROOT}/organizations/peerOrganizations/org1.example.com" ]; then
-    log "crypto material already exists"
-    return
-  fi
-  log "generating crypto material"
-  cryptogen generate --config="${FABRIC_ROOT}/cryptogen/crypto-config-org1.yaml" --output="${FABRIC_ROOT}/organizations"
-  cryptogen generate --config="${FABRIC_ROOT}/cryptogen/crypto-config-org2.yaml" --output="${FABRIC_ROOT}/organizations"
-  cryptogen generate --config="${FABRIC_ROOT}/cryptogen/crypto-config-orderer.yaml" --output="${FABRIC_ROOT}/organizations"
-}
 
 set_globals() {
   local org=$1
@@ -71,17 +59,9 @@ create_channel() {
   peer channel join -b "${FABRIC_ROOT}/channel-artifacts/${CHANNEL_NAME}.block"
 }
 
-seed_data() {
-  log "seeding skipped in bootstrap (handled by deploy-chaincode-k8s.sh)"
-}
-
 main() {
-  generate_crypto
-  log "waiting for peers"
-  sleep 20
   create_channel
-  sleep 5
-  log "bootstrap complete (chaincode deployed separately)"
+  log "bootstrap complete"
 }
 
 main "$@"
