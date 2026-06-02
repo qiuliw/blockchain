@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# HKZF 部署入口：链 (fabric ns) 与业务 (hkzf ns) 分离，全 K8s
+# HKZF 唯一部署入口（构建见 deploy/build.sh）
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")" && pwd)"
@@ -13,15 +13,21 @@ log() { echo "[deploy] $*"; }
 
 usage() {
   cat <<EOF
-用法: $0 [命令]
+用法: $0 <命令>
 
-  up      全栈：minikube + 链 + 业务（默认）
-  chain   仅部署 Fabric 网络与链码（namespace: fabric）
-  app     仅部署业务应用（namespace: hkzf，需 chain 已就绪）
-  stop    停止 localhost port-forward
+部署:
+  up        全栈（minikube + 链 + 业务）
+  chain     仅 Fabric 网络与链码
+  app       仅业务应用（需 chain 已就绪）
+  stop      停止 port-forward
+  forward   启动 Web port-forward（业务已部署时可用）
+
+构建:
+  build           构建全部镜像（等同 build.sh all）
+  build-app       仅 hkzf-api / hkzf-web
 
 示例:
-  $0 chain && $0 app
+  $0 build-app && $0 chain && $0 app
   $0 up
 EOF
 }
@@ -34,8 +40,9 @@ ensure_minikube() {
   eval "$(minikube docker-env)"
 }
 
-build_app_images() {
-  bash "$DEPLOY/scripts/build-images.sh" app
+run_build() {
+  ensure_minikube
+  bash "$DEPLOY/build.sh" "${1:-all}"
 }
 
 sync_app_fabric_certs() {
@@ -74,6 +81,10 @@ wait_app() {
   kubectl -n "$APP_NS" rollout status deployment/hkzf-web --timeout=120s
 }
 
+port_forward_cmd() {
+  echo "kubectl -n ${APP_NS} port-forward --address 0.0.0.0 svc/hkzf-web ${WEB_PORT}:80"
+}
+
 port_forward_stop() {
   if [[ -f "$PF_PID_FILE" ]]; then
     kill "$(cat "$PF_PID_FILE")" 2>/dev/null || true
@@ -89,49 +100,47 @@ port_forward_start() {
   echo $! >"$PF_PID_FILE"
   sleep 2
   if ! kill -0 "$(cat "$PF_PID_FILE")" 2>/dev/null; then
-    echo "port-forward 启动失败，日志:"
     cat /tmp/hkzf-port-forward.log
     exit 1
   fi
-  echo "访问: http://127.0.0.1:${WEB_PORT}/auth.html"
+  log "port-forward 已启动 (PID $(cat "$PF_PID_FILE"))"
+  log "访问: http://127.0.0.1:${WEB_PORT}/"
+  log "关于: http://127.0.0.1:${WEB_PORT}/about.html"
+  log "转发命令: $(port_forward_cmd)"
+  log "停止转发: $0 stop"
 }
 
 cmd_chain() {
   ensure_minikube
-  chmod +x "$DEPLOY/scripts/"*.sh
+  chmod +x "$DEPLOY/build.sh" "$DEPLOY/scripts/"*.sh
   bash "$DEPLOY/scripts/deploy-fabric-k8s.sh"
   bash "$DEPLOY/scripts/deploy-chaincode-k8s.sh"
-  log "chain layer ready (namespace ${FABRIC_NS})"
+  log "chain ready (ns ${FABRIC_NS})"
 }
 
 cmd_app() {
-  ensure_minikube
-  build_app_images
+  run_build app
   apply_app
   kubectl -n "$APP_NS" delete pod -l app=hkzf-api --force --grace-period=0 2>/dev/null || true
   wait_app
   port_forward_start
-  log "verify"
-  kubectl exec -n "$APP_NS" deploy/hkzf-web -- wget -qO- \
-    "http://hkzf-api:8080/auth?name=%E5%BC%A0%E4%B8%89&id=211004197001010000" || true
-  echo ""
 }
 
 cmd_up() {
   cmd_chain
   cmd_app
-  echo ""
-  echo "=========================================="
-  echo " HKZF 全 K8s 已部署"
-  echo " 链:   namespace ${FABRIC_NS}"
-  echo " 业务: namespace ${APP_NS}"
-  echo " 访问: http://127.0.0.1:${WEB_PORT}/auth.html"
-  echo "=========================================="
+}
+
+cmd_forward() {
+  kubectl -n "$APP_NS" get svc/hkzf-web >/dev/null 2>&1 || {
+    log "hkzf-web 未就绪，请先执行: $0 app"
+    exit 1
+  }
+  port_forward_start
 }
 
 cmd_stop() {
   port_forward_stop
-  log "port-forward stopped"
 }
 
 main() {
@@ -139,6 +148,9 @@ main() {
     up) cmd_up ;;
     chain) cmd_chain ;;
     app) cmd_app ;;
+    forward) cmd_forward ;;
+    build) run_build all ;;
+    build-app) run_build app ;;
     stop) cmd_stop ;;
     -h|--help|help) usage ;;
     *)

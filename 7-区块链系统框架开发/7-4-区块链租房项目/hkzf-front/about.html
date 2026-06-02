@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>关于 - 链信租房</title>
+    <link rel="stylesheet" href="css/app.css">
+    <link rel="stylesheet" href="css/deck.css">
+</head>
+<body>
+<header class="site-header">
+    <div class="site-header-inner">
+        <a class="brand" href="index.html">链信租房<span>Blockchain Rental</span></a>
+        <nav class="nav-links" id="site-nav"></nav>
+    </div>
+</header>
+
+<div class="deck-hint">← → 翻页 · F 全屏</div>
+
+<main class="deck-page">
+    <div class="deck" id="deck">
+
+        <section class="deck-slide active" data-title="封面">
+            <div class="deck-slide-inner deck-cover">
+                <div class="deck-kicker">课程项目汇报</div>
+                <h1>基于 Hyperledger Fabric 的<br>区块链租房可信平台</h1>
+                <p class="tagline">身份核验 · 房产确权 · 合同存证 —— 租赁关键数据上链，全流程可追溯、不可篡改</p>
+                <p class="meta">HKZF（链信租房）· Go + Fabric 2.5 + Kubernetes</p>
+            </div>
+        </section>
+
+        <section class="deck-slide" data-title="背景">
+            <div class="deck-slide-inner light">
+                <div class="deck-kicker" style="color:var(--primary)">01 项目背景</div>
+                <h2>传统租房中的信任问题</h2>
+                <ul>
+                    <li><strong>身份难核实</strong>：租客/房东身份信息缺乏权威、可验证的数据源。</li>
+                    <li><strong>产权难确认</strong>：房产证与持有人是否一致，中介难以独立校验。</li>
+                    <li><strong>合同易纠纷</strong>：纸质或电子版合同可被事后修改，举证成本高。</li>
+                </ul>
+                <p style="margin-top:20px"><strong>建设思路</strong>：用联盟链承载「认证结果」与「合同摘要」，多机构共识记账，提升租赁环节透明度与可信度。</p>
+            </div>
+        </section>
+
+        <section class="deck-slide" data-title="目标">
+            <div class="deck-slide-inner light">
+                <div class="deck-kicker" style="color:var(--primary)">02 建设目标</div>
+                <h2>项目要实现什么</h2>
+                <div class="deck-grid-2">
+                    <div class="deck-tile">
+                        <h3>业务目标</h3>
+                        <p>完成「身份 → 房产 → 签约」三步链上核验与存证，模拟真实租房合规流程。</p>
+                    </div>
+                    <div class="deck-tile">
+                        <h3>技术目标</h3>
+                        <p>掌握 Fabric 通道、链码生命周期、CCAAS、双组织背书及 K8s 部署。</p>
+                    </div>
+                    <div class="deck-tile">
+                        <h3>工程目标</h3>
+                        <p>构建与链码分离的应用层，Shell 统一入口（build.sh + deploy.sh），结构清晰可演示。</p>
+                    </div>
+                    <div class="deck-tile">
+                        <h3>展示目标</h3>
+                        <p>提供可操作的 Web 前端，教师/评委可现场走通全流程并查看链上结果。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="deck-slide" data-title="架构">
+            <div class="deck-slide-inner light">
+                <div class="deck-kicker" style="color:var(--primary)">03 总体架构</div>
+                <h2>系统分层（链 / 业务分离）</h2>
+                <div class="deck-arch">
+                    <div class="deck-arch-row">
+                        <div class="deck-box">Web 前端<br><small>hkzf-front</small></div>
+                    </div>
+                    <div class="deck-arch-row"><span class="deck-arrow">↓ HTTP</span></div>
+                    <div class="deck-arch-row">
+                        <div class="deck-box">API 服务<br><small>hkzf-back · Beego</small></div>
+                        <span class="deck-arrow">→</span>
+                        <div class="deck-box accent">Fabric Gateway<br><small>fabric-gateway</small></div>
+                    </div>
+                    <div class="deck-arch-row"><span class="deck-arrow">↓ gRPC / TLS</span></div>
+                    <div class="deck-arch-row">
+                        <div class="deck-box muted-box">namespace: fabric</div>
+                    </div>
+                    <div class="deck-arch-row">
+                        <div class="deck-box">Orderer</div>
+                        <div class="deck-box">Peer Org1</div>
+                        <div class="deck-box">Peer Org2</div>
+                        <div class="deck-box accent">CCAAS 链码 ×3</div>
+                    </div>
+                </div>
+                <p style="margin-top:16px;font-size:0.9rem">应用部署在 <strong>hkzf</strong> 命名空间；Fabric 网络部署在 <strong>fabric</strong> 命名空间，职责清晰、可独立扩缩。</p>
+            </div>
+        </section>
+
+        <section class="deck-slide" data-title="技术栈">
+            <div class="deck-slide-inner light">
+                <div class="deck-kicker" style="color:var(--primary)">04 技术栈</div>
+                <h2>主要技术与版本</h2>
+                <table class="deck-table">
+                    <thead>
+                    <tr><th>层次</th><th>技术选型</th><th>说明</th></tr>
+                    </thead>
+                    <tbody>
+                    <tr><td>区块链</td><td>Hyperledger Fabric 2.5.12</td><td>Raft 排序、双组织 MSP、通道 mychannel</td></tr>
+                    <tr><td>链码</td><td>Go · CCAAS</td><td>链码即服务，独立容器运行</td></tr>
+                    <tr><td>后端</td><td>Go 1.22 · Beego</td><td>REST API，Gateway 访问账本</td></tr>
+                    <tr><td>前端</td><td>Vue 2 · 静态页</td><td>三步业务流程 + 管理导入</td></tr>
+                    <tr><td>构建</td><td>deploy/build.sh + Docker</td><td>多阶段镜像构建</td></tr>
+                    <tr><td>部署</td><td>deploy.sh + K8s</td><td>./deploy.sh up 一键全栈</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="deck-slide" data-title="业务流程">
+            <div class="deck-slide-inner light">
+                <div class="deck-kicker" style="color:var(--primary)">05 业务流程</div>
+                <h2>三步闭环</h2>
+                <div class="deck-grid-3">
+                    <div class="deck-tile">
+                        <h3>① 身份认证</h3>
+                        <p>链码 <code>authentication</code><br>校验姓名+身份证，返回是否匹配及不良记录标记。</p>
+                    </div>
+                    <div class="deck-tile">
+                        <h3>② 房产认证</h3>
+                        <p>链码 <code>certification</code><br>校验房产证号与持有人，是否可出租。</p>
+                    </div>
+                    <div class="deck-tile">
+                        <h3>③ 签约存证</h3>
+                        <p>链码 <code>contract</code><br>合同文件 SHA256 摘要上链，防篡改存证。</p>
+                    </div>
+                </div>
+                <p style="margin-top:20px">前端用 Session 记录步骤进度；每步调用后端 API，由 Peer 背书后写入世界状态。</p>
+            </div>
+        </section>
+
+        <section class="deck-slide" data-title="链码">
+            <div class="deck-slide-inner light">
+                <div class="deck-kicker" style="color:var(--primary)">06 链码设计</div>
+                <h2>三个独立链码模块</h2>
+                <table class="deck-table">
+                    <thead>
+                    <tr><th>链码</th><th>主要方法</th><th>存储键</th><th>返回示例</th></tr>
+                    </thead>
+                    <tbody>
+                    <tr><td>authentication</td><td>check / add</td><td>身份证号</td><td>true:false</td></tr>
+                    <tr><td>certification</td><td>check / add</td><td>房产证号</td><td>true:true</td></tr>
+                    <tr><td>contract</td><td>save / query</td><td>合同编号</td><td>摘要哈希</td></tr>
+                    </tbody>
+                </table>
+                <p style="margin-top:16px">Lifecycle：install → 双 org approve → commit；写操作需 <strong>双组织背书</strong> 满足通道策略。</p>
+            </div>
+        </section>
+
+        <section class="deck-slide" data-title="演示">
+            <div class="deck-slide-inner light">
+                <div class="deck-kicker" style="color:var(--primary)">07 演示说明</div>
+                <h2>现场演示路径</h2>
+                <ol style="padding-left:1.2rem;color:#334155;line-height:1.9">
+                    <li>启动：<code>./deploy.sh up</code>（或 <code>build-app</code> → <code>chain</code> → <code>app</code>）</li>
+                    <li>访问：<code>http://127.0.0.1:30888/auth.html</code></li>
+                    <li>身份认证：张三 / 211004197001010000 → 预期 <strong>true:false</strong></li>
+                    <li>房产、合同页按样本数据继续完成流程</li>
+                </ol>
+                <div class="deck-grid-2" style="margin-top:20px">
+                    <div class="deck-tile">
+                        <h3>构建</h3>
+                        <p><code>./deploy.sh build-app</code><br><code>./deploy.sh build</code>（含链码）</p>
+                    </div>
+                    <div class="deck-tile">
+                        <h3>管理端</h3>
+                        <p><code>admin.html</code> 批量 CSV 导入链上认证数据</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="deck-slide" data-title="部署">
+            <div class="deck-slide-inner light">
+                <div class="deck-kicker" style="color:var(--primary)">08 部署架构</div>
+                <h2>全 Kubernetes 部署</h2>
+                <ul>
+                    <li><strong>fabric</strong>：Orderer、Peer0-Org1/2、PVC 证书与账本、CCAAS Deployment</li>
+                    <li><strong>hkzf</strong>：hkzf-api（initContainer 解压 Fabric 证书）、hkzf-web（Nginx 反代）</li>
+                    <li>证书域名与 K8s Service 通过 hostAliases 对齐（orderer.example.com 等）</li>
+                    <li>入口：<code>./deploy.sh</code>；镜像：<code>./deploy/build.sh</code></li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="deck-slide" data-title="规模">
+            <div class="deck-slide-inner light">
+                <div class="deck-kicker" style="color:var(--primary)">09 代码规模</div>
+                <h2>核心 vs 工程化</h2>
+                <div class="deck-stats">
+                    <div class="deck-stat">
+                        <div class="num">~300</div>
+                        <div class="lbl">链码 Go</div>
+                    </div>
+                    <div class="deck-stat">
+                        <div class="num">~470</div>
+                        <div class="lbl">后端 Go</div>
+                    </div>
+                    <div class="deck-stat">
+                        <div class="num">~1000</div>
+                        <div class="lbl">前端</div>
+                    </div>
+                    <div class="deck-stat">
+                        <div class="num">~1800</div>
+                        <div class="lbl">业务合计</div>
+                    </div>
+                </div>
+                <p style="margin-top:20px">部署与 K8s 配置约千行，主要用于 Fabric 生命周期与环境适配；<strong>业务逻辑精炼</strong>。</p>
+            </div>
+        </section>
+
+        <section class="deck-slide" data-title="难点">
+            <div class="deck-slide-inner light">
+                <div class="deck-kicker" style="color:var(--primary)">10 难点与解决</div>
+                <h2>实施过程中的关键问题</h2>
+                <table class="deck-table">
+                    <thead>
+                    <tr><th>问题</th><th>解决方案</th></tr>
+                    </thead>
+                    <tbody>
+                    <tr><td>Peer 无法解析 orderer.example.com</td><td>hostAliases 映射证书域名到 ClusterIP</td></tr>
+                    <tr><td>双 org 链码 commit / invoke TLS</td><td>使用证书 SAN 域名连接多 Peer</td></tr>
+                    <tr><td>API 容器证书挂载</td><td>Secret 打包 tar + initContainer 解压</td></tr>
+                    <tr><td>账本重启丢失通道</td><td>CORE_PEER_FILESYSTEMPATH 持久化到 PVC</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="deck-slide" data-title="总结">
+            <div class="deck-slide-inner deck-cover">
+                <div class="deck-kicker">总结</div>
+                <h2>项目价值与展望</h2>
+                <ul style="text-align:left;max-width:640px;margin:24px auto 0">
+                    <li>完成联盟链租房场景从链码到前端的<strong>端到端落地</strong></li>
+                    <li>链与业务<strong>命名空间隔离</strong>，符合工程化部署思路</li>
+                    <li>可扩展：接入真实身份/房管接口、增加背书策略、监控与审计</li>
+                </ul>
+                <p class="meta" style="margin-top:32px">
+                    <a href="index.html" style="color:#93c5fd">返回首页</a> ·
+                    <a href="auth.html" style="color:#93c5fd">开始演示</a>
+                </p>
+            </div>
+        </section>
+
+    </div>
+</main>
+
+<div class="deck-toolbar">
+    <div class="deck-nav-left">
+        <button type="button" id="btn-first">第一页</button>
+        <button type="button" id="btn-prev">上一页</button>
+    </div>
+    <div class="deck-dots" id="dots"></div>
+    <span class="deck-progress" id="progress">1 / 12</span>
+    <button type="button" id="btn-next">下一页</button>
+    <button type="button" id="btn-full">全屏</button>
+</div>
+
+<script src="js/app.js"></script>
+<script>
+(function () {
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.deck-slide'));
+  var idx = 0;
+  var dotsEl = document.getElementById('dots');
+  var progressEl = document.getElementById('progress');
+
+  slides.forEach(function (_, i) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.title = slides[i].getAttribute('data-title') || '';
+    b.addEventListener('click', function () { go(i); });
+    dotsEl.appendChild(b);
+  });
+
+  function go(n) {
+    if (n < 0 || n >= slides.length) return;
+    slides[idx].classList.remove('active');
+    idx = n;
+    slides[idx].classList.add('active');
+    var dots = dotsEl.querySelectorAll('button');
+    for (var i = 0; i < dots.length; i++) {
+      dots[i].classList.toggle('active', i === idx);
+    }
+    progressEl.textContent = (idx + 1) + ' / ' + slides.length + ' · ' + (slides[idx].getAttribute('data-title') || '');
+  }
+
+  document.getElementById('btn-first').onclick = function () { go(0); };
+  document.getElementById('btn-prev').onclick = function () { go(idx - 1); };
+  document.getElementById('btn-next').onclick = function () { go(idx + 1); };
+  document.getElementById('btn-full').onclick = function () {
+    var el = document.documentElement;
+    if (!document.fullscreenElement) el.requestFullscreen().catch(function () {});
+    else document.exitFullscreen();
+  };
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') {
+      e.preventDefault();
+      go(idx + 1);
+    } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+      e.preventDefault();
+      go(idx - 1);
+    } else if (e.key === 'Home') {
+      go(0);
+    } else if (e.key === 'End') {
+      go(slides.length - 1);
+    } else if (e.key === 'f' || e.key === 'F') {
+      document.getElementById('btn-full').click();
+    }
+  });
+
+  go(0);
+})();
+</script>
+</body>
+</html>

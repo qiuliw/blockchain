@@ -13,19 +13,18 @@
 <header class="site-header">
     <div class="site-header-inner">
         <a class="brand" href="index.html">链信租房<span>Blockchain Rental</span></a>
-        <nav class="nav-links" v-html="navHtml"></nav>
+        <nav class="nav-links" id="site-nav"></nav>
     </div>
 </header>
 
 <div id="app" class="page" :class="{loading: loading}">
     <div class="card">
         <h1>链上数据管理</h1>
-        <p class="subtitle">批量导入 CSV 认证数据或上传合同文件，供前台核验使用</p>
+        <p class="subtitle">批量导入 CSV 认证数据，供前台核验使用</p>
 
         <div class="tabs">
             <button class="tab" :class="{active: tab==='auth'}" @click="tab='auth'">个人认证数据</button>
             <button class="tab" :class="{active: tab==='house'}" @click="tab='house'">房产认证数据</button>
-            <button class="tab" :class="{active: tab==='contract'}" @click="tab='contract'">合同文件</button>
         </div>
 
         <!-- 个人认证 CSV -->
@@ -58,20 +57,6 @@
             <button class="btn btn-primary" @click="uploadHouse" :disabled="!houseForm">上传并写入链上</button>
         </div>
 
-        <!-- 合同 -->
-        <div v-show="tab==='contract'">
-            <div class="alert alert-info">
-                文件名（不含扩展名）作为合同编号，系统将计算 SHA256 并上链
-            </div>
-            <div class="sample-links">
-                <a href="samples/HT2026001.pdf" download>下载示例 HT2026001.pdf</a>
-            </div>
-            <div class="upload-area">
-                <input type="file" accept="image/jpeg,application/pdf" @change="onContractFile">
-            </div>
-            <button class="btn btn-primary" @click="uploadContract" :disabled="!contractForm">上传合同</button>
-        </div>
-
         <div class="flow-actions" style="margin-top:20px">
             <a href="index.html" class="btn btn-outline">← 返回首页</a>
         </div>
@@ -84,11 +69,9 @@
 new Vue({
     el: '#app',
     data: {
-        navHtml: HKZF.renderNav('admin'),
         tab: 'auth',
         authForm: null,
         houseForm: null,
-        contractForm: null,
         loading: false,
         message: '',
         messageType: 'info'
@@ -106,19 +89,11 @@ new Vue({
             this.houseForm.append('house', e.target.files[0]);
             this.houseForm.append('type', 'csv');
         },
-        onContractFile: function (e) {
-            if (!e.target.files.length) return;
-            this.contractForm = new FormData();
-            this.contractForm.append('contract', e.target.files[0]);
-        },
         uploadAuth: function () {
             this._upload('/api/auth', this.authForm, '个人认证数据已接收，约 5 秒后写入链上');
         },
         uploadHouse: function () {
             this._upload('/api/house', this.houseForm, '房产认证数据已接收，约 5 秒后写入链上');
-        },
-        uploadContract: function () {
-            this._upload('/api/contract', this.contractForm, '合同已成功上链存证');
         },
         _upload: function (url, form, okMsg) {
             var self = this;

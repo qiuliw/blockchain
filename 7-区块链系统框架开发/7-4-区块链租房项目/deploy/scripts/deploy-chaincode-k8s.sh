@@ -64,7 +64,7 @@ commit_chaincode() {
 }
 
 build_ccaas_image() {
-  bash "$DEPLOY/scripts/build-images.sh" chaincode "$1" "${1}_ccaas:local"
+  bash "$DEPLOY/build.sh" chaincode "$1"
 }
 
 ensure_ccaas_service() {
@@ -232,7 +232,6 @@ seed_data() {
 
 main() {
   mkdir -p "$CCAAS_DIR" "$PKG_DIR"
-  eval "$(minikube docker-env)"
   deploy_one authentication
   deploy_one certification
   deploy_one contract

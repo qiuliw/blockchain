@@ -13,7 +13,7 @@
 <header class="site-header">
     <div class="site-header-inner">
         <a class="brand" href="index.html">链信租房<span>Blockchain Rental</span></a>
-        <nav class="nav-links" v-html="navHtml"></nav>
+        <nav class="nav-links" id="site-nav"></nav>
     </div>
 </header>
 
@@ -67,7 +67,6 @@ var flow = HKZF.getFlow();
 new Vue({
     el: '#app',
     data: {
-        navHtml: HKZF.renderNav('house'),
         stepsHtml: HKZF.renderSteps(2),
         flow: flow,
         houseId: '1111112222223333333000000000',

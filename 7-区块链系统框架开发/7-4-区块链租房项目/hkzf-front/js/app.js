@@ -47,17 +47,28 @@ var HKZF = {
     vm.messageType = 'error';
   },
 
+  currentPage: function () {
+    var file = (location.pathname.split('/').pop() || 'index.html').split('?')[0];
+    if (!file) file = 'index.html';
+    return file.replace(/\.html$/, '');
+  },
+
+  mountNav: function (active) {
+    var el = document.getElementById('site-nav');
+    if (el) el.innerHTML = this.renderNav(active || this.currentPage());
+  },
+
   renderNav: function (active) {
+    var page = (active || '').replace(/\.html$/, '');
     var links = [
       { href: 'index.html', label: '首页' },
-      { href: 'auth.html', label: '1. 身份认证' },
-      { href: 'house.html', label: '2. 房产认证' },
-      { href: 'contract.html', label: '3. 签约存证' },
-      { href: 'admin.html', label: '数据管理' }
+      { href: 'admin.html', label: '数据管理' },
+      { href: 'about.html', label: '关于' }
     ];
     var html = '';
     for (var i = 0; i < links.length; i++) {
-      var cls = links[i].href.indexOf(active) >= 0 ? ' class="active"' : '';
+      var name = links[i].href.replace(/\.html$/, '');
+      var cls = name === page ? ' class="active"' : '';
       html += '<a href="' + links[i].href + '"' + cls + '>' + links[i].label + '</a>';
     }
     return html;
@@ -97,3 +108,14 @@ var HKZF = {
     return map[current] || 'index.html';
   }
 };
+
+(function () {
+  function mount() {
+    HKZF.mountNav();
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', mount);
+  } else {
+    mount();
+  }
+})();
