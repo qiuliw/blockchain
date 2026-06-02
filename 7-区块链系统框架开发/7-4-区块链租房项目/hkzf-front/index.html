@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>区块链租房平台</title>
+    <title>链信租房 - 区块链租房平台</title>
     <link rel="stylesheet" href="css/app.css">
     <script src="vue.js"></script>
     <script src="vue-resource.js"></script>
@@ -17,65 +17,90 @@
     </div>
 </header>
 
-<div id="app" class="page">
-    <section class="hero">
-        <h1>安全可信的区块链租房平台</h1>
-        <p>基于 Hyperledger Fabric，完成身份核验、房产确权与合同上链存证，让租赁交易透明可追溯。</p>
-        <a href="auth.html" class="btn btn-primary">开始租房流程</a>
+<div id="app" class="page home-page">
+    <section class="home-hero">
+        <h1>链信租房</h1>
+        <p class="home-tagline">区块链赋能的租赁服务平台</p>
+        <p class="home-desc">身份核验 · 房源确权 · 合同存证，关键信息上链可追溯、不可篡改</p>
     </section>
 
-    <div class="feature-grid">
-        <div class="feature-card">
-            <h3>① 身份认证</h3>
-            <p>对接公安链码，核验租客/房东姓名与身份证是否匹配，并查询是否有不良记录。</p>
-            <a href="auth.html" class="btn btn-primary">去认证</a>
+    <div class="card home-application" v-if="flow.rentalId">
+        <div class="home-application-head">
+            <div>
+                <div class="home-label">我的租赁申请</div>
+                <div class="home-application-id">{{ flow.rentalId }}</div>
+            </div>
+            <span class="status-badge" :class="'status-' + status.cls">{{ status.text }}</span>
         </div>
-        <div class="feature-card">
-            <h3>② 房产认证</h3>
-            <p>对接房管链码，验证房产证号与持有人身份，确认房源是否具备出租资格。</p>
-            <a href="house.html" class="btn btn-primary">去认证</a>
-        </div>
-        <div class="feature-card">
-            <h3>③ 签约存证</h3>
-            <p>上传租赁合同，链上存储 SHA256 摘要，随时可查、不可篡改。</p>
-            <a href="contract.html" class="btn btn-primary">去签约</a>
+        <div class="home-summary">
+            <div class="home-summary-item">
+                <span>租客</span>
+                <strong>{{ flow.name || '—' }}</strong>
+            </div>
+            <div class="home-summary-item">
+                <span>房源编号</span>
+                <strong>{{ flow.houseId || '—' }}</strong>
+            </div>
+            <div class="home-summary-item">
+                <span>合同编号</span>
+                <strong>{{ flow.contractId || '—' }}</strong>
+            </div>
         </div>
     </div>
 
-    <div class="card" style="margin-top:32px">
-        <h1>我的进度</h1>
-        <p class="subtitle">完成以下步骤即可发起正式租赁</p>
-        <div v-html="stepsHtml"></div>
-        <div class="result-grid">
-            <div class="result-item">
-                <div class="label">身份认证</div>
-                <div class="value" :class="flow.authDone ? 'ok' : 'no'">{{ flow.authDone ? '已完成' : '待完成' }}</div>
-            </div>
-            <div class="result-item">
-                <div class="label">房产认证</div>
-                <div class="value" :class="flow.houseDone ? 'ok' : 'no'">{{ flow.houseDone ? '已完成' : '待完成' }}</div>
-            </div>
-            <div class="result-item">
-                <div class="label">合同存证</div>
-                <div class="value" :class="flow.contractDone ? 'ok' : 'no'">{{ flow.contractDone ? '已完成' : '待完成' }}</div>
-            </div>
-        </div>
-        <button class="btn btn-secondary" style="margin-top:20px" @click="reset">重置进度</button>
+    <div class="card home-application home-application--empty" v-else>
+        <div class="home-label">我的租赁申请</div>
+        <p class="home-empty-text">尚未发起申请。点击下方按钮开始办理，系统将引导您完成全流程。</p>
     </div>
+
+    <div class="card home-flow">
+        <div class="home-flow-head">
+            <h2>办理进度</h2>
+            <p>请按顺序完成；未完成前置步骤时，后续环节不可进入</p>
+        </div>
+
+        <div v-html="stepsHtml" class="home-steps"></div>
+
+        <div class="home-actions">
+            <a href="#" class="btn btn-primary" @click.prevent="continueFlow">{{ ctaLabel }}</a>
+            <button type="button" class="btn btn-ghost" @click="reset" v-if="flow.rentalId">新建申请</button>
+        </div>
+    </div>
+
+    <p class="home-foot">链上数据由 Hyperledger Fabric 联盟网络共识存证</p>
 </div>
 
 <script>
 new Vue({
     el: '#app',
     data: {
-        stepsHtml: HKZF.renderSteps(0),
-        flow: HKZF.getFlow()
+        flow: HKZF.getFlow(),
+        stepsHtml: HKZF.renderSteps(0)
+    },
+    computed: {
+        status: function () {
+            return HKZF.flowStatus(this.flow);
+        },
+        ctaLabel: function () {
+            return HKZF.nextStepLabel();
+        }
     },
     methods: {
-        reset: function () {
-            HKZF.resetFlow();
-            this.flow = {};
+        refresh: function () {
+            this.flow = HKZF.getFlow();
             this.stepsHtml = HKZF.renderSteps(0);
+        },
+        continueFlow: function () {
+            if (!this.flow.rentalId) {
+                HKZF.beginRental();
+                this.refresh();
+            }
+            location.href = HKZF.nextStepUrl();
+        },
+        reset: function () {
+            if (!confirm('确定新建申请？当前办理进度将清空。')) return;
+            HKZF.resetFlow();
+            this.refresh();
         }
     }
 });

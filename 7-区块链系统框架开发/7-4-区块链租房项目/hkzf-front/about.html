@@ -161,10 +161,11 @@
                 <div class="deck-kicker" style="color:var(--primary)">07 演示说明</div>
                 <h2>现场演示路径</h2>
                 <ol style="padding-left:1.2rem;color:#334155;line-height:1.9">
-                    <li>启动：<code>./deploy.sh up</code>（或 <code>build-app</code> → <code>chain</code> → <code>app</code>）</li>
-                    <li>访问：<code>http://127.0.0.1:30888/auth.html</code></li>
-                    <li>身份认证：张三 / 211004197001010000 → 预期 <strong>true:false</strong></li>
-                    <li>房产、合同页按样本数据继续完成流程</li>
+                    <li>启动：<code>./deploy.sh up</code></li>
+                    <li>管理端导入 <code>auth.csv</code>、<code>house.csv</code>（各等约 5 秒）</li>
+                    <li>访问：<code>http://127.0.0.1:30888/</code> 发起租赁申请</li>
+                    <li>三步办理：身份认证 → 房产认证 → 签约存证（样本见 <code>samples/</code>）</li>
+                    <li>业务模型详见项目 <code>docs/业务模型.md</code></li>
                 </ol>
                 <div class="deck-grid-2" style="margin-top:20px">
                     <div class="deck-tile">

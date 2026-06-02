@@ -55,7 +55,7 @@ func (this *Auth) check(stub shim.ChaincodeStubInterface, args []string) peer.Re
 		if split[0] == name {
 			result = "true"
 		} else {
-			result = "true"
+			result = "false"
 		}
 
 		result = result + ":" + split[1]

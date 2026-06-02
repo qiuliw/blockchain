@@ -18,11 +18,12 @@
 </header>
 
 <div id="app" class="page" :class="{loading: loading}">
+    <div v-html="rentalPanelHtml"></div>
     <div v-html="stepsHtml"></div>
 
     <div class="card">
-        <h1>个人身份认证</h1>
-        <p class="subtitle">请输入姓名与身份证号，平台将查询公安链上数据进行核验</p>
+        <h1>第 1 步 · 个人身份认证</h1>
+        <p class="subtitle">租赁申请 {{ flow.rentalId }} · 查询公安链上权威数据进行核验</p>
 
         <div class="form-group">
             <label>姓名</label>
@@ -38,9 +39,10 @@
         </div>
 
         <div class="flow-actions" style="margin-top:12px">
-            <a :href="prevUrl" class="btn btn-outline">← 返回上一步</a>
+            <a :href="prevUrl" class="btn btn-outline">← 返回首页</a>
             <span class="spacer"></span>
-            <a href="house.html" class="btn btn-secondary">下一步：房产认证 →</a>
+            <a v-if="flow.authDone" href="house.html" class="btn btn-secondary">下一步：房产认证 →</a>
+            <span v-else class="btn btn-secondary btn-disabled">下一步：房产认证 →</span>
         </div>
 
         <div v-if="message" class="alert" :class="'alert-' + messageType">{{ message }}</div>
@@ -59,10 +61,13 @@
 </div>
 
 <script>
+HKZF.beginRental();
 new Vue({
     el: '#app',
     data: {
+        flow: HKZF.getFlow(),
         stepsHtml: HKZF.renderSteps(1),
+        rentalPanelHtml: HKZF.renderRentalPanel(),
         name: '张三',
         id: '211004197001010000',
         loading: false,
@@ -73,6 +78,11 @@ new Vue({
         HKZF: HKZF
     },
     methods: {
+        refresh: function () {
+            this.flow = HKZF.getFlow();
+            this.stepsHtml = HKZF.renderSteps(1);
+            this.rentalPanelHtml = HKZF.renderRentalPanel();
+        },
         check: function () {
             var self = this;
             self.loading = true;
@@ -84,16 +94,29 @@ new Vue({
                     self.loading = false;
                     self.result = HKZF.parsePair(res.body);
                     if (self.result.first && !self.result.second) {
-                        self.message = '身份认证通过，可进行房产认证';
+                        self.message = '身份认证通过，请继续房产认证';
                         self.messageType = 'success';
-                        HKZF.saveFlow({ authDone: true, name: self.name, id: self.id });
-                        self.stepsHtml = HKZF.renderSteps(1);
+                        HKZF.saveFlow({
+                            authDone: true,
+                            name: self.name,
+                            id: self.id,
+                            houseDone: false,
+                            contractDone: false,
+                            houseId: '',
+                            contractId: '',
+                            contractHash: ''
+                        });
+                        self.refresh();
                     } else if (!self.result.first) {
+                        HKZF.saveFlow({ authDone: false, houseDone: false, contractDone: false });
                         self.message = '链上未找到匹配的身份信息，请联系管理员导入数据';
                         self.messageType = 'warning';
+                        self.refresh();
                     } else {
-                        self.message = '存在不良个人记录，无法继续租房流程';
+                        HKZF.saveFlow({ authDone: false, houseDone: false, contractDone: false });
+                        self.message = '存在不良个人记录，无法继续租赁流程';
                         self.messageType = 'error';
+                        self.refresh();
                     }
                 },
                 function (err) {

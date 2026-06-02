@@ -15,6 +15,19 @@ type ContractController struct {
 }
 
 func (this *ContractController) SetValue() {
+	name := this.GetString("name")
+	id := this.GetString("id")
+	houseId := this.GetString("houseId")
+
+	if ok, msg := verifyAuthOnChain(name, id); !ok {
+		handleResponse(this.Ctx.ResponseWriter, 403, msg)
+		return
+	}
+	if ok, msg := verifyHouseOnChain(houseId, id); !ok {
+		handleResponse(this.Ctx.ResponseWriter, 403, msg)
+		return
+	}
+
 	file, header, err := this.GetFile("contract")
 	if err != nil {
 		handleResponse(this.Ctx.ResponseWriter, 400, err.Error())
@@ -29,13 +42,14 @@ func (this *ContractController) SetValue() {
 		return
 	}
 
-	args := [][]byte{[]byte(key), []byte(hex.EncodeToString(hash.Sum(nil)))}
-	response, err := models.Invoke(beego.AppConfig.String("chaincode_id_contract"), "set", args)
+	hashHex := hex.EncodeToString(hash.Sum(nil))
+	args := [][]byte{[]byte(key), []byte(hashHex)}
+	_, err = models.Invoke(beego.AppConfig.String("chaincode_id_contract"), "set", args)
 	if err != nil {
 		handleResponse(this.Ctx.ResponseWriter, 500, err.Error())
 		return
 	}
-	handleResponse(this.Ctx.ResponseWriter, 200, response)
+	handleResponse(this.Ctx.ResponseWriter, 200, hashHex)
 }
 
 func (this *ContractController) GetValue() {

@@ -18,69 +18,89 @@
 </header>
 
 <div id="app" class="page" :class="{loading: loading}">
+    <div v-html="rentalPanelHtml"></div>
     <div v-html="stepsHtml"></div>
 
     <div class="card">
-        <h1>租赁合同上链存证</h1>
-        <p class="subtitle">上传合同文件，系统将计算 SHA256 摘要并写入区块链，文件名（不含扩展名）作为合同编号</p>
+        <h1>第 3 步 · 租赁合同上链存证</h1>
+        <p class="subtitle">租赁申请 {{ flow.rentalId }} · 后端将复核身份与房产，通过后写入合同哈希</p>
 
-        <div v-if="flow.houseId" class="alert alert-info">
-            已认证房产：{{ flow.houseId }} · 租户：{{ flow.name || '—' }}
+        <div class="alert alert-info">
+            租客 {{ flow.name }}（{{ HKZF.maskId(flow.id) }}）· 房源 {{ flow.houseId }}
         </div>
 
         <div class="upload-area">
-            <p>支持 PDF / JPG，文件名示例：<strong>HT2026001.pdf</strong></p>
-            <input type="file" @change="onSelect" accept="image/jpeg,application/pdf">
+            <p>支持 PDF / JPG，示例：<strong>HT2026001.pdf</strong></p>
+            <input type="file" @change="onSelect" accept="image/jpeg,application/pdf" :disabled="flow.contractDone">
         </div>
 
-        <button class="btn btn-primary btn-block" @click="upload" :disabled="!file">上传并存证</button>
+        <button class="btn btn-primary btn-block" @click="upload" :disabled="!file || flow.contractDone">上传并存证</button>
 
         <div class="flow-actions" style="margin-top:16px">
-            <a :href="prevUrl" class="btn btn-outline">← 返回上一步</a>
+            <a :href="prevUrl" class="btn btn-outline">← 返回房产认证</a>
             <span class="spacer"></span>
-            <a href="index.html" class="btn btn-secondary">完成，返回首页</a>
+            <a href="index.html" class="btn btn-secondary">返回办理中心</a>
         </div>
 
         <div v-if="message" class="alert" :class="'alert-' + messageType">{{ message }}</div>
-    </div>
-
-    <div class="card">
-        <h1>查询合同存证</h1>
-        <p class="subtitle">输入合同编号，查询链上存储的哈希值</p>
-
-        <div class="form-group">
-            <label>合同编号</label>
-            <input type="text" v-model="contractId" placeholder="与上传文件名一致，如 HT2026001">
-        </div>
-        <button class="btn btn-primary" @click="query" :disabled="!contractId">查询</button>
 
         <div v-if="hash" class="alert alert-success" style="word-break:break-all">
             链上哈希：{{ hash }}
         </div>
     </div>
+
+    <div class="card">
+        <h1>查询合同存证</h1>
+        <p class="subtitle">输入本申请合同编号，查询链上存储的哈希值</p>
+
+        <div class="form-group">
+            <label>合同编号</label>
+            <input type="text" v-model="contractId" placeholder="如 HT2026001">
+        </div>
+        <button class="btn btn-primary" @click="query" :disabled="!contractId">查询</button>
+
+        <div v-if="queryHash" class="alert alert-success" style="word-break:break-all;margin-top:16px">
+            链上哈希：{{ queryHash }}
+        </div>
+    </div>
 </div>
 
 <script>
-new Vue({
+if (!HKZF.guardStep(3)) {
+  // redirecting
+} else {
+  var flow = HKZF.getFlow();
+  new Vue({
     el: '#app',
     data: {
+        flow: flow,
         stepsHtml: HKZF.renderSteps(3),
-        flow: HKZF.getFlow(),
+        rentalPanelHtml: HKZF.renderRentalPanel(),
         formData: null,
         file: null,
-        contractId: '',
-        hash: '',
+        contractId: flow.contractId || '',
+        hash: flow.contractHash || '',
+        queryHash: '',
         loading: false,
-        message: '',
-        messageType: 'info',
-        prevUrl: HKZF.prevStep(3)
+        message: flow.contractDone ? '本申请合同已完成链上存证' : '',
+        messageType: flow.contractDone ? 'success' : 'info',
+        prevUrl: HKZF.prevStep(3),
+        HKZF: HKZF
     },
     methods: {
+        refresh: function () {
+            this.flow = HKZF.getFlow();
+            this.stepsHtml = HKZF.renderSteps(3);
+            this.rentalPanelHtml = HKZF.renderRentalPanel();
+        },
         onSelect: function (e) {
             if (!e.target.files.length) return;
             this.file = e.target.files[0];
             this.formData = new FormData();
             this.formData.append('contract', this.file);
+            this.formData.append('name', this.flow.name);
+            this.formData.append('id', this.flow.id);
+            this.formData.append('houseId', this.flow.houseId);
             var name = this.file.name.replace(/\.[^.]+$/, '');
             this.contractId = name;
         },
@@ -93,11 +113,15 @@ new Vue({
             HKZF.apiPostForm(self, '/api/contract', self.formData).then(
                 function (res) {
                     self.loading = false;
-                    self.message = '合同已成功上链存证';
+                    self.message = '合同已成功上链存证，租赁申请办理完成';
                     self.messageType = 'success';
                     self.hash = (res.body || '').toString();
-                    HKZF.saveFlow({ contractDone: true, contractId: self.contractId });
-                    self.stepsHtml = HKZF.renderSteps(3);
+                    HKZF.saveFlow({
+                        contractDone: true,
+                        contractId: self.contractId,
+                        contractHash: self.hash
+                    });
+                    self.refresh();
                 },
                 function (err) {
                     self.loading = false;
@@ -108,14 +132,13 @@ new Vue({
         query: function () {
             var self = this;
             self.loading = true;
-            self.hash = '';
-            self.message = '';
+            self.queryHash = '';
 
             HKZF.apiGet(self, '/api/contract', { contractId: self.contractId }).then(
                 function (res) {
                     self.loading = false;
-                    self.hash = (res.body || '').toString();
-                    if (!self.hash) {
+                    self.queryHash = (res.body || '').toString();
+                    if (!self.queryHash) {
                         self.message = '链上未找到该合同';
                         self.messageType = 'warning';
                     }
@@ -127,7 +150,8 @@ new Vue({
             );
         }
     }
-});
+  });
+}
 </script>
 </body>
 </html>
