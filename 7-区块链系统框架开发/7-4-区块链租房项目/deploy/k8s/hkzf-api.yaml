@@ -19,7 +19,7 @@ spec:
             - "host.minikube.internal"
       containers:
         - name: hkzf-api
-          image: hkzf-api:v6
+          image: hkzf-api:local
           imagePullPolicy: Never
           ports:
             - containerPort: 8080

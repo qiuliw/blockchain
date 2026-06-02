@@ -1,15 +1,17 @@
 FROM golang:1.22-bookworm AS builder
 
-RUN apt-get update && apt-get install -y --no-install-recommends libltdl-dev && rm -rf /var/lib/apt/lists/*
+ARG GOPROXY=https://goproxy.cn,direct
+ENV GOPROXY=${GOPROXY} CGO_ENABLED=0
 
-WORKDIR /go/src/hkzf
+WORKDIR /src
+COPY hkzf-back/go.mod hkzf-back/go.sum ./
+RUN go mod download
+
 COPY hkzf-back/ ./
-
-ENV GOPATH=/go GO111MODULE=off CGO_ENABLED=1
-RUN go build -o /hkzf .
+RUN go build -trimpath -ldflags="-s -w" -o /hkzf .
 
 FROM debian:bookworm-slim
-RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates libltdl7 && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 COPY --from=builder /hkzf /app/hkzf
 COPY hkzf-back/conf /app/conf

@@ -1,3 +1,26 @@
-deploy/fabric
 .git
-chaincode/vendor
+.gitignore
+**/.git
+
+# Fabric 证书与通道（运行时生成 / K8s 挂载）
+deploy/fabric
+
+# 链码安装包
+deploy/chaincode-pkgs
+deploy/.chaincode-pkgs
+
+# 旧 SDK 证书（构建不需要）
+hkzf-back/conf/crypto
+
+# Go 构建产物与 vendor
+hkzf-back/bin
+hkzf-back/hkzf-api
+**/vendor
+
+# 运行时上传目录
+hkzf-back/static/upload
+
+# 测试与 IDE
+**/*_test.go
+.idea
+.vscode

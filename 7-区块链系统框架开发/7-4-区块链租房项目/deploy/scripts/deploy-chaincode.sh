@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 在宿主机构建并部署 CCAAS 链码（避免 peer 容器内 docker build 失败）
+# 使用 Docker 多阶段构建 CCAAS 链码并部署到 Fabric 网络
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
@@ -51,11 +51,11 @@ run_peer() {
 
 build_ccaas_image() {
   local name=$1
-  log "building image ${name}_ccaas"
-  docker build --no-cache -f "$DEPLOY/docker/Dockerfile.chaincode" \
-    --build-arg "CHAINCODE_DIR=${name}" \
-    -t "${name}_ccaas:local" \
-    "$ROOT"
+  if [ "${SKIP_CCAAS_BUILD:-}" = "1" ]; then
+    log "skip build ${name}_ccaas (SKIP_CCAAS_BUILD=1)"
+    return
+  fi
+  bash "$DEPLOY/scripts/build-images.sh" chaincode "$name" "${name}_ccaas:local"
 }
 
 start_ccaas_container() {

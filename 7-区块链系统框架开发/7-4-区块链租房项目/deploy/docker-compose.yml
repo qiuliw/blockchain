@@ -1,4 +1,4 @@
-# Fabric 网络（宿主机 Docker）；应用部署在 minikube
+# Fabric 网络基础设施；应用请使用项目根目录 ./deploy.sh
 name: hkzf-fabric
 
 networks:

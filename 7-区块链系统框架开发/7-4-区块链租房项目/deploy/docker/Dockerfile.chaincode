@@ -1,8 +1,15 @@
 FROM hyperledger/fabric-ccenv:2.5.12 AS builder
+
 ARG CHAINCODE_DIR
+ARG GOPROXY=https://goproxy.cn,direct
+ENV GOPROXY=${GOPROXY} CGO_ENABLED=0
+
 WORKDIR /src
+COPY chaincode/${CHAINCODE_DIR}/go.mod chaincode/${CHAINCODE_DIR}/go.sum ./
+RUN go mod download
+
 COPY chaincode/${CHAINCODE_DIR}/ ./
-RUN GO111MODULE=on go build -mod=vendor -o /tmp/chaincode .
+RUN go build -trimpath -ldflags="-s -w" -o /tmp/chaincode .
 
 FROM hyperledger/fabric-baseos:2.5.12
 COPY --from=builder /tmp/chaincode /chaincode/chaincode

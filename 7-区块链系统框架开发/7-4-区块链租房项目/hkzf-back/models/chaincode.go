@@ -1,173 +1,170 @@
 package models
 
 import (
-	"errors"
+	"crypto/x509"
+	"fmt"
+	"os"
+	"path"
 	"sync"
+	"time"
 
 	"github.com/astaxie/beego"
-	fab "github.com/hyperledger/fabric-sdk-go/api/apifabclient"
-	"github.com/hyperledger/fabric-sdk-go/api/apitxn"
-	"github.com/hyperledger/fabric-sdk-go/def/fabapi"
-	clientImpl "github.com/hyperledger/fabric-sdk-go/pkg/fabric-client"
-	"github.com/hyperledger/fabric-sdk-go/pkg/fabric-client/orderer"
-	"github.com/hyperledger/fabric-sdk-go/pkg/fabric-client/peer"
+	"github.com/hyperledger/fabric-gateway/pkg/client"
+	"github.com/hyperledger/fabric-gateway/pkg/hash"
+	"github.com/hyperledger/fabric-gateway/pkg/identity"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 )
 
 var (
-	sdkOnce sync.Once
-	sdkInst *fabapi.FabricSDK
-	sdkErr  error
+	gatewayOnce sync.Once
+	gatewayInst *client.Gateway
+	gatewayErr  error
 )
 
-func sdk() (*fabapi.FabricSDK, error) {
-	sdkOnce.Do(func() {
-		sdkInst, sdkErr = fabapi.NewSDK(fabapi.Options{
-			ConfigFile: beego.AppConfig.String("sdk_config"),
-		})
+func gateway() (*client.Gateway, error) {
+	gatewayOnce.Do(func() {
+		conn, err := newGrpcConnection()
+		if err != nil {
+			gatewayErr = err
+			return
+		}
+
+		id, err := newIdentity()
+		if err != nil {
+			gatewayErr = err
+			return
+		}
+
+		sign, err := newSign()
+		if err != nil {
+			gatewayErr = err
+			return
+		}
+
+		gatewayInst, gatewayErr = client.Connect(
+			id,
+			client.WithSign(sign),
+			client.WithHash(hash.SHA256),
+			client.WithClientConnection(conn),
+			client.WithEvaluateTimeout(30*time.Second),
+			client.WithEndorseTimeout(60*time.Second),
+			client.WithSubmitTimeout(30*time.Second),
+			client.WithCommitStatusTimeout(2*time.Minute),
+		)
 	})
-	return sdkInst, sdkErr
+	return gatewayInst, gatewayErr
 }
 
 func channelID() string {
 	return beego.AppConfig.String("channel_id")
 }
 
-func userID() string {
-	return beego.AppConfig.String("user_id")
+func fabricConfig(key, fallback string) string {
+	if v := beego.AppConfig.String(key); v != "" {
+		return v
+	}
+	return fallback
+}
+
+func contract(chaincodeID string) (*client.Contract, error) {
+	gw, err := gateway()
+	if err != nil {
+		return nil, err
+	}
+	return gw.GetNetwork(channelID()).GetContract(chaincodeID), nil
+}
+
+func toStringArgs(args [][]byte) []string {
+	out := make([]string, len(args))
+	for i, arg := range args {
+		out[i] = string(arg)
+	}
+	return out
 }
 
 func Query(chaincodeID, fcn string, args [][]byte) ([]byte, error) {
-	s, err := sdk()
+	c, err := contract(chaincodeID)
 	if err != nil {
 		return nil, err
 	}
-	client, err := s.NewChannelClient(channelID(), userID())
-	if err != nil {
-		return nil, err
-	}
-	defer client.Close()
-	return client.Query(apitxn.QueryRequest{ChaincodeID: chaincodeID, Fcn: fcn, Args: args})
+	return c.EvaluateTransaction(fcn, toStringArgs(args)...)
 }
 
 func Invoke(chaincodeID, fcn string, args [][]byte) ([]byte, error) {
-	s, err := sdk()
+	c, err := contract(chaincodeID)
 	if err != nil {
 		return nil, err
 	}
-	return submitTx(s, chaincodeID, fcn, args)
+	return c.SubmitTransaction(fcn, toStringArgs(args)...)
 }
 
-func buildChannel(client fab.FabricClient, channelID string) (fab.Channel, error) {
-	ch, err := client.NewChannel(channelID)
+func newGrpcConnection() (*grpc.ClientConn, error) {
+	tlsCertPath := fabricConfig("fabric_tls_cert", "/app/fabric/peer-tls/ca.crt")
+	gatewayPeer := fabricConfig("fabric_gateway_peer", "peer0.org1.example.com")
+	peerEndpoint := fabricConfig("fabric_peer_endpoint", "dns:///host.minikube.internal:7051")
+
+	certificatePEM, err := os.ReadFile(tlsCertPath)
+	if err != nil {
+		return nil, fmt.Errorf("read TLS certificate %s: %w", tlsCertPath, err)
+	}
+
+	certificate, err := identity.CertificateFromPEM(certificatePEM)
 	if err != nil {
 		return nil, err
 	}
 
-	orderers, err := client.Config().ChannelOrderers(channelID)
-	if err != nil {
-		return nil, err
-	}
-	for _, cfg := range orderers {
-		o, err := orderer.NewOrdererFromConfig(&cfg, client.Config())
-		if err != nil {
-			return nil, err
-		}
-		if err = ch.AddOrderer(o); err != nil {
-			return nil, err
-		}
-	}
+	certPool := x509.NewCertPool()
+	certPool.AddCert(certificate)
+	transportCredentials := credentials.NewClientTLSFromCert(certPool, gatewayPeer)
 
-	peers, err := client.Config().ChannelPeers(channelID)
-	if err != nil {
-		return nil, err
-	}
-	for _, p := range peers {
-		node, err := peer.NewPeerFromConfig(&p.NetworkPeer, client.Config())
-		if err != nil {
-			return nil, err
-		}
-		if err = ch.AddPeer(node); err != nil {
-			return nil, err
-		}
-	}
-	return ch, nil
+	return grpc.NewClient(peerEndpoint, grpc.WithTransportCredentials(transportCredentials))
 }
 
-func submitTx(s *fabapi.FabricSDK, chaincodeID, fcn string, args [][]byte) ([]byte, error) {
-	orgCfg, err := s.ConfigProvider().Client()
+func newIdentity() (*identity.X509Identity, error) {
+	mspID := fabricConfig("fabric_msp_id", "Org1MSP")
+	certDir := fabricConfig("fabric_cert_dir", "/app/fabric/msp/signcerts")
+
+	certificatePEM, err := readFirstFile(certDir)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("read certificate from %s: %w", certDir, err)
 	}
-	session, err := s.NewPreEnrolledUserSession(orgCfg.Organization, userID())
+
+	certificate, err := identity.CertificateFromPEM(certificatePEM)
 	if err != nil {
 		return nil, err
 	}
 
-	cfg := s.ConfigProvider()
-	client := clientImpl.NewClient(cfg)
-	client.SetCryptoSuite(s.CryptoSuiteProvider())
-	client.SetStateStore(s.StateStoreProvider())
-	client.SetUserContext(session.Identity())
-	client.SetSigningManager(s.SigningManager())
+	return identity.NewX509Identity(mspID, certificate)
+}
 
-	ch, err := buildChannel(client, channelID())
+func newSign() (identity.Sign, error) {
+	keyDir := fabricConfig("fabric_key_dir", "/app/fabric/msp/keystore")
+
+	privateKeyPEM, err := readFirstFile(keyDir)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("read private key from %s: %w", keyDir, err)
 	}
 
-	discovery, err := s.DiscoveryProvider().NewDiscoveryService(channelID())
-	if err != nil {
-		return nil, err
-	}
-	selection, err := s.SelectionProvider().NewSelectionService(channelID())
+	privateKey, err := identity.PrivateKeyFromPEM(privateKeyPEM)
 	if err != nil {
 		return nil, err
 	}
 
-	peerList, err := discovery.GetPeers()
+	return identity.NewPrivateKeySign(privateKey)
+}
+
+func readFirstFile(dirPath string) ([]byte, error) {
+	dir, err := os.Open(dirPath)
 	if err != nil {
 		return nil, err
 	}
-	endorsers, err := selection.GetEndorsersForChaincode(peerList, chaincodeID)
+	defer dir.Close()
+
+	names, err := dir.Readdirnames(1)
 	if err != nil {
 		return nil, err
 	}
 
-	request := apitxn.ChaincodeInvokeRequest{
-		ChaincodeID: chaincodeID,
-		Fcn:         fcn,
-		Args:        args,
-		Targets:     peer.PeersToTxnProcessors(endorsers),
-	}
-
-	sender, ok := ch.(apitxn.ProposalSender)
-	if !ok {
-		return nil, errors.New("channel does not support transaction proposals")
-	}
-	resps, txID, err := sender.SendTransactionProposal(request)
-	if err != nil {
-		return nil, err
-	}
-	for _, v := range resps {
-		if v.Err != nil {
-			return nil, v.Err
-		}
-	}
-
-	txSender, ok := ch.(apitxn.Sender)
-	if !ok {
-		return nil, errors.New("channel does not support transaction submit")
-	}
-	tx, err := txSender.CreateTransaction(resps)
-	if err != nil {
-		return nil, err
-	}
-	txResp, err := txSender.SendTransaction(tx)
-	if err != nil {
-		return nil, err
-	}
-	if txResp.Err != nil {
-		return nil, txResp.Err
-	}
-	return []byte(txID.ID), nil
+	return os.ReadFile(path.Join(dirPath, names[0]))
 }
