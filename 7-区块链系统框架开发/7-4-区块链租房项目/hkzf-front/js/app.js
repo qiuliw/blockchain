@@ -158,7 +158,8 @@ var HKZF = {
     var links = [
       { href: 'index.html', label: '首页' },
       { href: 'admin.html', label: '数据管理' },
-      { href: 'about.html', label: '关于' }
+      { href: 'about.html', label: '关于' },
+      { href: 'present.html', label: '答辩' }
     ];
     var html = '';
     for (var i = 0; i < links.length; i++) {

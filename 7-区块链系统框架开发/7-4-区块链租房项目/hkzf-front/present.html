@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>答辩汇报 - 链信租房</title>
+    <link rel="stylesheet" href="css/app.css">
+    <link rel="stylesheet" href="css/deck.css">
+</head>
+<body class="present-body">
+<header class="site-header">
+    <div class="site-header-inner">
+        <a class="brand" href="index.html">链信租房<span>Blockchain Rental</span></a>
+        <nav class="nav-links" id="site-nav"></nav>
+    </div>
+</header>
+
+<div class="deck-hint">← → 翻页 · F 全屏 · N 讲稿</div>
+
+<main class="deck-page present-page">
+    <div class="deck" id="deck">
+
+        <section class="deck-slide active" data-title="封面" data-notes="各位老师好，我汇报的项目是「链信租房」——基于 Hyperledger Fabric 的区块链租房可信平台。围绕身份、房产、合同三类数据完成上链核验与存证，实现可追溯、不可篡改。">
+            <div class="deck-slide-inner deck-cover">
+                <div class="deck-kicker">课程答辩 · 简版</div>
+                <h1>链信租房<br>区块链租房可信平台</h1>
+                <p class="tagline">身份核验 · 房源确权 · 合同存证</p>
+                <p class="meta">Hyperledger Fabric 2.5 · Go · Vue · Kubernetes</p>
+            </div>
+        </section>
+
+        <section class="deck-slide" data-title="背景" data-notes="传统租房里，身份、产权、合同都容易产生信任问题。我们把认证结果和合同摘要放到联盟链上，多节点共识记账，提升透明度。">
+            <div class="deck-slide-inner light">
+                <div class="deck-kicker" style="color:var(--primary)">01 背景</div>
+                <h2>要解决什么问题？</h2>
+                <ul>
+                    <li><strong>身份</strong>：租客/房东信息难以权威核验</li>
+                    <li><strong>房产</strong>：产权证与持有人是否一致难确认</li>
+                    <li><strong>合同</strong>：电子版易被修改，举证困难</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="deck-slide" data-title="流程" data-notes="管理端导入 CSV 写链；用户发起租赁申请，依次完成身份核验、房源认证、合同存证。合同上传时后端会重新查链复核，通过后才写入哈希。">
+            <div class="deck-slide-inner light">
+                <div class="deck-kicker" style="color:var(--primary)">02 业务流程</div>
+                <h2>租赁申请办理（三步）</h2>
+                <div class="deck-flow-simple">
+                    <div class="deck-flow-step">① 身份核验</div>
+                    <div class="deck-flow-arrow">→</div>
+                    <div class="deck-flow-step">② 房源认证</div>
+                    <div class="deck-flow-arrow">→</div>
+                    <div class="deck-flow-step">③ 合同存证</div>
+                </div>
+                <p style="margin-top:24px">前置：管理端导入 <code>auth.csv</code>、<code>house.csv</code> 权威数据上链</p>
+            </div>
+        </section>
+
+        <section class="deck-slide" data-title="角色" data-notes="管理端只管权威数据写入；用户端走完租赁流程。合同由用户上传存证，不在管理端日常录入。">
+            <div class="deck-slide-inner light">
+                <div class="deck-kicker" style="color:var(--primary)">03 角色分工</div>
+                <h2>谁做什么？</h2>
+                <div class="deck-grid-2">
+                    <div class="deck-tile">
+                        <h3>管理端</h3>
+                        <p>导入公安 / 房管 CSV<br>写入身份、房产链码</p>
+                    </div>
+                    <div class="deck-tile">
+                        <h3>用户端</h3>
+                        <p>发起租赁申请<br>三步核验 + 合同上链</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="deck-slide" data-title="架构" data-notes="Web 调 API，API 通过 Fabric Gateway 访问链码。K8s 部署，fabric 和 hkzf 两个命名空间分离。">
+            <div class="deck-slide-inner light">
+                <div class="deck-kicker" style="color:var(--primary)">04 技术架构</div>
+                <h2>系统分层</h2>
+                <div class="deck-arch-simple">
+                    <div class="deck-box">Web 前端</div>
+                    <div class="deck-arrow-down">↓</div>
+                    <div class="deck-box">Go API</div>
+                    <div class="deck-arrow-down">↓</div>
+                    <div class="deck-box accent">Fabric · 3 链码 · 双组织</div>
+                </div>
+                <p style="margin-top:16px;font-size:0.9rem">namespace <strong>fabric</strong>（链）与 <strong>hkzf</strong>（业务）分离部署</p>
+            </div>
+        </section>
+
+        <section class="deck-slide" data-title="链码" data-notes="身份链码存身份证号对应姓名和不良记录；房产链码存房产证和产权人；合同链码存编号和 SHA256。合同上传接口会复核前两步。">
+            <div class="deck-slide-inner light">
+                <div class="deck-kicker" style="color:var(--primary)">05 链码</div>
+                <h2>三个链码</h2>
+                <table class="deck-table deck-table-sm">
+                    <thead><tr><th>链码</th><th>作用</th><th>用户操作</th></tr></thead>
+                    <tbody>
+                    <tr><td>authentication</td><td>身份核验</td><td>查询</td></tr>
+                    <tr><td>certification</td><td>房源认证</td><td>查询</td></tr>
+                    <tr><td>contract</td><td>合同哈希存证</td><td>上传（经复核）</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="deck-slide" data-title="演示" data-notes="执行 deploy.sh up，管理端导入样本 CSV，用户端用张三样本走通三步，上传 HT2026001.pdf 可查链上哈希。">
+            <div class="deck-slide-inner light">
+                <div class="deck-kicker" style="color:var(--primary)">06 演示</div>
+                <h2>现场演示路径</h2>
+                <ol class="deck-ol">
+                    <li><code>./deploy.sh up</code> 启动</li>
+                    <li>管理端导入 auth.csv、house.csv</li>
+                    <li>用户端：张三 → 样本房产证 → 上传合同</li>
+                    <li>查询链上合同哈希</li>
+                </ol>
+                <p style="margin-top:16px">
+                    <a href="index.html" style="color:var(--primary)">打开办理中心 →</a>
+                </p>
+            </div>
+        </section>
+
+        <section class="deck-slide" data-title="总结" data-notes="项目完成了端到端落地，形成权威数据加用户办理加后端复核的闭环。后续可扩展登录、真实政务对接等。谢谢老师。">
+            <div class="deck-slide-inner deck-cover" style="text-align:center">
+                <div class="deck-kicker">谢谢</div>
+                <h2>项目价值</h2>
+                <ul style="text-align:left;max-width:520px;margin:20px auto">
+                    <li>端到端：链码 + 后端 + 前端 + K8s</li>
+                    <li>业务闭环：权威数据 → 三步办理 → 后端复核</li>
+                    <li>可扩展：登录、单号上链、真实接口对接</li>
+                </ul>
+                <p class="meta">
+                    <a href="index.html" style="color:#93c5fd">返回首页</a>
+                </p>
+            </div>
+        </section>
+
+    </div>
+</main>
+
+<div class="deck-notes-panel" id="notes-panel">
+    <div class="deck-notes-label">讲稿 <span class="deck-notes-hint">（按 N 隐藏）</span></div>
+    <div class="deck-notes-text" id="notes-text"></div>
+</div>
+
+<div class="deck-toolbar">
+    <div class="deck-nav-left">
+        <button type="button" id="btn-first">第一页</button>
+        <button type="button" id="btn-prev">上一页</button>
+    </div>
+    <div class="deck-dots" id="dots"></div>
+    <span class="deck-progress" id="progress">1 / 8</span>
+    <button type="button" id="btn-next">下一页</button>
+    <button type="button" id="btn-notes">讲稿</button>
+    <button type="button" id="btn-full">全屏</button>
+</div>
+
+<script src="js/app.js"></script>
+<script src="js/deck.js"></script>
+</body>
+</html>
