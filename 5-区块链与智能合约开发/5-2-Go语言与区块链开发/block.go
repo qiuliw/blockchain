@@ -6,17 +6,17 @@ import (
 
 // 0. 定义区块结构
 type Block struct {
-	// 1. 前区块hash
+	// 前区块hash
 	PrevHash []byte
-	// 2. 当前区块hash
-	Hash []byte
-	// 3. 数据
+	// 数据
 	Data []byte
+	// 当前区块hash（PrevHash+Data）唯一性不只数据，还包含前区块hash
+	Hash []byte
 }
 
 // 2. 创建区块
 func NewBlock(data string, prevHash []byte) *Block {
-	block := &Block{[]byte{}, []byte{}, []byte(data)}
+	block := &Block{prevHash, []byte(data), []byte{}}
 	block.SetHash() // 生成hash
 	return block
 }
