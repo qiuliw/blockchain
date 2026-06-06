@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"encoding/binary"
+	"encoding/gob"
 	"time"
 )
 
@@ -30,11 +31,6 @@ type Block struct {
 
 	// 数据
 	Data []byte
-
-	// 当前区块hash
-	// 正常比特币并不会存储这个字段
-	// hash属于区块头计算结果
-	// 这里为了教学方便不保存，动态计算
 }
 
 // 2. 创建区块
@@ -90,41 +86,34 @@ func (b *Block) Hash() []byte {
 	return hash[:]
 }
 
-// 4. 引入区块链
-type BlockChain struct {
-	blocks []*Block // 区块数组
-}
+// 区块序列化
+func (b *Block) Serialize() []byte {
 
-// 5. 创建一个区块链
-func NewBlockChain() *BlockChain {
+	var buffer bytes.Buffer
 
-	// 创建区块链时，默认添加创世区块
-	return &BlockChain{
-		blocks: []*Block{
-			GenesisBlock(),
-		},
+	encoder := gob.NewEncoder(&buffer)
+
+	err := encoder.Encode(b)
+	if err != nil {
+		panic(err)
 	}
+
+	return buffer.Bytes()
 }
 
-// 6. 生成创世区块
-func GenesisBlock() *Block {
-	return NewBlock("Genesis Block", []byte{})
-}
+// 区块反序列化
+func Deserialize(data []byte) *Block {
 
-// 7. 添加区块
-func (bc *BlockChain) AddBlock(data string) {
+	var block Block
 
-	// 获取最后一个区块
-	lastBlock := bc.blocks[len(bc.blocks)-1]
+	decoder := gob.NewDecoder(bytes.NewReader(data))
 
-	// 动态计算前一个区块的哈希
-	prevHash := lastBlock.Hash()
+	err := decoder.Decode(&block)
+	if err != nil {
+		panic(err)
+	}
 
-	// 创建新区块
-	newBlock := NewBlock(data, prevHash)
-
-	// 添加到区块链
-	bc.blocks = append(bc.blocks, newBlock)
+	return &block
 }
 
 // 辅助函数，将 uint64 转换为 []byte

@@ -6,11 +6,17 @@ func main() {
 
 	chain := NewBlockChain()
 
-	chain.AddBlock("Hello, Blockchain!")
+	defer chain.db.Close()
 
-	for i, block := range chain.blocks {
+	chain.AddBlock("Hello Blockchain")
+	chain.AddBlock("Hello Golang")
+	chain.AddBlock("Hello BoltDB")
 
-		fmt.Printf("Height: %d\n", i)
+	it := chain.NewIterator()
+
+	for {
+
+		block := it.Next()
 
 		fmt.Printf("Version: %d\n", block.Version)
 
@@ -29,5 +35,9 @@ func main() {
 		fmt.Printf("Validate: %t\n", pow.Validate())
 
 		fmt.Println()
+
+		if len(block.PrevHash) == 0 {
+			break
+		}
 	}
 }
