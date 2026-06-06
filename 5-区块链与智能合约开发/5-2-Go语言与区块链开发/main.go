@@ -1,43 +1,19 @@
 package main
 
-import "fmt"
-
+// go run . addBlock --data "hello"
+// go run . printChain
 func main() {
+	// 创建或读出区块链
+	bc := NewBlockChain()
 
-	chain := NewBlockChain()
+	// 程序退出时关闭数据库
+	defer bc.db.Close()
 
-	defer chain.db.Close()
-
-	chain.AddBlock("Hello Blockchain")
-	chain.AddBlock("Hello Golang")
-	chain.AddBlock("Hello BoltDB")
-
-	it := chain.NewIterator()
-
-	for {
-
-		block := it.Next()
-
-		fmt.Printf("Version: %d\n", block.Version)
-
-		fmt.Printf("PrevHash: %x\n", block.PrevHash)
-
-		fmt.Printf("Hash: %x\n", block.Hash())
-
-		fmt.Printf("Nonce: %d\n", block.Nonce)
-
-		fmt.Printf("Difficulty: %d\n", block.Difficulty)
-
-		fmt.Printf("Data: %s\n", block.Data)
-
-		pow := NewProofOfWork(block)
-
-		fmt.Printf("Validate: %t\n", pow.Validate())
-
-		fmt.Println()
-
-		if len(block.PrevHash) == 0 {
-			break
-		}
+	// 创建命令行对象
+	cli := CLI{
+		bc: bc,
 	}
+
+	// 运行命令行
+	cli.Run()
 }

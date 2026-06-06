@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"go.etcd.io/bbolt"
 )
 
@@ -103,6 +105,10 @@ func (bc *BlockChain) AddBlock(data string) {
 
 		bucket := tx.Bucket([]byte(blockBucket))
 
+		if bucket == nil {
+			return fmt.Errorf("Bucket %q not found! please check your database", blockBucket)
+		}
+
 		// 添加到区块链
 		err := bucket.Put(
 			newBlock.Hash(),
@@ -114,6 +120,7 @@ func (bc *BlockChain) AddBlock(data string) {
 		}
 
 		// 更新最后区块hash
+		// 注意，先添加区块，再更新最后区块hash，否则中间如果发生错误，tail就会指向一个不存在的区块
 		err = bucket.Put(
 			[]byte(lastHashKey),
 			newBlock.Hash(),
@@ -130,5 +137,41 @@ func (bc *BlockChain) AddBlock(data string) {
 
 	if err != nil {
 		panic(err)
+	}
+}
+
+// 打印区块链
+func (bc *BlockChain) PrintChain() {
+
+	it := bc.NewIterator()
+
+	for {
+
+		block := it.Next()
+
+		fmt.Printf("Version: %d\n", block.Version)
+
+		fmt.Printf("PrevHash: %x\n", block.PrevHash)
+
+		fmt.Printf("Hash: %x\n", block.Hash())
+
+		fmt.Printf("Timestamp: %d\n", block.Timestamp)
+
+		fmt.Printf("Nonce: %d\n", block.Nonce)
+
+		fmt.Printf("Difficulty: %d\n", block.Difficulty)
+
+		fmt.Printf("Data: %s\n", block.Data)
+
+		pow := NewProofOfWork(block)
+
+		fmt.Printf("Validate: %t\n", pow.Validate())
+
+		fmt.Println()
+
+		// 创世区块
+		if len(block.PrevHash) == 0 {
+			break
+		}
 	}
 }
