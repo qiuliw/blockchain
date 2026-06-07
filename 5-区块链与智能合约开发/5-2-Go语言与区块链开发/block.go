@@ -15,7 +15,7 @@ type Block struct {
 
 	// MerkleRoot(这是一个概念，暂时不实现)
 	// 它是区块中所有交易的hash值的树形结构的根节点hash值
-	MerkleRoot []byte
+	MerkelRoot []byte
 
 	// 时间戳
 	Timestamp int64
@@ -30,21 +30,25 @@ type Block struct {
 	PrevHash []byte
 
 	// 数据
-	Data []byte
+	// Data []byte
+	Transactions []*Transaction // 真实的交易数组
 }
 
 // 2. 创建区块
-func NewBlock(data string, prevHash []byte) *Block {
+func NewBlock(txs []*Transaction, prevHash []byte) *Block {
 
 	block := &Block{
 		Version:    0,
 		PrevHash:   prevHash,
-		MerkleRoot: []byte{},
+		MerkelRoot: []byte{},
 		Timestamp:  time.Now().Unix(),
 		Difficulty: 16,
 		Nonce:      0,
-		Data:       []byte(data),
+		// Data:       []byte(data),
+		Transactions: txs,
 	}
+
+	block.MerkelRoot = block.MakeMerkelRoot()
 
 	// 创建工作量证明对象
 	pow := NewProofOfWork(block)
@@ -63,12 +67,13 @@ func (b *Block) PrepareData(nonce uint64) []byte {
 
 	tmp := [][]byte{
 		Uint64ToBytes(b.Version),
-		b.MerkleRoot,
+		b.MerkelRoot,
 		Uint64ToBytes(uint64(b.Timestamp)),
 		Uint64ToBytes(b.Difficulty),
 		Uint64ToBytes(nonce),
 		b.PrevHash,
-		b.Data,
+		// 只对区块头做Hash，区块体通过MerkelRoot影响hash
+		// b.Data,
 	}
 
 	return bytes.Join(tmp, []byte{})
@@ -124,4 +129,10 @@ func Uint64ToBytes(num uint64) []byte {
 	binary.BigEndian.PutUint64(buf, num)
 
 	return buf
+}
+
+// 模拟 MerkelRoot，真实是对交易hash做二叉树
+func (b *Block) MakeMerkelRoot() []byte {
+	// TODO
+	return []byte{}
 }

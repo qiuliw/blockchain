@@ -4,7 +4,7 @@ package main
 // go run . printChain
 func main() {
 	// 创建或读出区块链
-	bc := NewBlockChain()
+	bc := NewBlockChain("to")
 
 	// 程序退出时关闭数据库
 	defer bc.db.Close()

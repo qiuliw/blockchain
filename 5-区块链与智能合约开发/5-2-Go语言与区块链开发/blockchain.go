@@ -16,9 +16,10 @@ type BlockChain struct {
 const blockChainDB = "blockchain.db"
 const blockBucket = "blocks"
 const lastHashKey = "LastHash"
+const genesisInfo = "创世信息"
 
 // 创建一个区块链
-func NewBlockChain() *BlockChain {
+func NewBlockChain(to string) *BlockChain {
 
 	// 打开数据库
 	db, err := bbolt.Open(blockChainDB, 0600, nil)
@@ -45,7 +46,7 @@ func NewBlockChain() *BlockChain {
 			}
 
 			// 创建区块链时，默认添加创世区块
-			genesisBlock := GenesisBlock()
+			genesisBlock := GenesisBlock(to)
 
 			// 保存创世区块
 			err = bucket.Put(
@@ -88,18 +89,20 @@ func NewBlockChain() *BlockChain {
 }
 
 // 生成创世区块
-func GenesisBlock() *Block {
-	return NewBlock("Genesis Block", []byte{})
+func GenesisBlock(to string) *Block {
+
+	coinbase := NewCoinbaseTX(to, genesisInfo)
+	return NewBlock([]*Transaction{coinbase}, []byte{})
 }
 
 // 添加区块
-func (bc *BlockChain) AddBlock(data string) {
+func (bc *BlockChain) AddBlock(txs []*Transaction) {
 
 	// 动态计算前一个区块的哈希
 	prevHash := bc.tail
 
 	// 创建新区块
-	newBlock := NewBlock(data, prevHash)
+	newBlock := NewBlock(txs, prevHash)
 
 	err := bc.db.Update(func(tx *bbolt.Tx) error {
 
@@ -161,10 +164,10 @@ func (bc *BlockChain) PrintChain() {
 
 		fmt.Printf("Difficulty: %d\n", block.Difficulty)
 
-		fmt.Printf("Data: %s\n", block.Data)
+		fmt.Printf("Data: %s\n", block.Transactions[0].TXInputs[0].Signature)
 
+		// 工作量合法性验证
 		pow := NewProofOfWork(block)
-
 		fmt.Printf("Validate: %t\n", pow.Validate())
 
 		fmt.Println()

@@ -67,7 +67,7 @@ func (cli *CLI) Run() {
 			os.Exit(1)
 		}
 
-		cli.bc.AddBlock(*addBlockData)
+		// cli.bc.AddBlock(*addBlockData)
 
 		fmt.Println("add block success")
 	}
