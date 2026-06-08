@@ -57,3 +57,36 @@ func TestFindUTXOs(t *testing.T) {
 		t.Fatalf("expected alice UTXO value 5, got %d", aliceUTXOs[0].Value)
 	}
 }
+
+func TestNewTransaction(t *testing.T) {
+	_ = os.Remove(blockChainDB)
+
+	bc := NewBlockChain("miner")
+	defer func() {
+		bc.db.Close()
+		_ = os.Remove(blockChainDB)
+	}()
+
+	tx := NewTransaction("miner", "alice", 5, bc)
+	if tx == nil {
+		t.Fatal("expected transaction, got nil")
+	}
+
+	bc.AddBlock([]*Transaction{tx})
+
+	minerUTXOs := bc.FindUTXOs("miner")
+	if len(minerUTXOs) != 1 {
+		t.Fatalf("expected 1 UTXO for miner after transfer, got %d", len(minerUTXOs))
+	}
+	if minerUTXOs[0].Value != reward-5 {
+		t.Fatalf("expected miner UTXO value %d after transfer, got %d", reward-5, minerUTXOs[0].Value)
+	}
+
+	aliceUTXOs := bc.FindUTXOs("alice")
+	if len(aliceUTXOs) != 1 {
+		t.Fatalf("expected 1 UTXO for alice after transfer, got %d", len(aliceUTXOs))
+	}
+	if aliceUTXOs[0].Value != 5 {
+		t.Fatalf("expected alice UTXO value 5 after transfer, got %d", aliceUTXOs[0].Value)
+	}
+}
