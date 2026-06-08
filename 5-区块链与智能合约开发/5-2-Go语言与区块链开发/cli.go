@@ -27,20 +27,20 @@ func (cli *CLI) Run() {
 		os.Exit(1)
 	}
 
+	// 命令
 	addBlockCmd := flag.NewFlagSet("addBlock", flag.ExitOnError)
 	printChainCmd := flag.NewFlagSet("printChain", flag.ExitOnError)
 	getBalanceCmd := flag.NewFlagSet("getBalance", flag.ExitOnError)
 	sendCmd := flag.NewFlagSet("send", flag.ExitOnError)
 
+	// 参数定义
+	addBlockData := addBlockCmd.String("data", "", "block data")
+	getBalanceAddress := getBalanceCmd.String("address", "", "address balance")
 	sendFrom := sendCmd.String("from", "", "source address")
 	sendTo := sendCmd.String("to", "", "destination address")
 	sendAmount := sendCmd.Int64("amount", 0, "transfer amount")
 	sendMiner := sendCmd.String("miner", "", "miner address")
 	sendData := sendCmd.String("data", "", "miner data")
-
-	// 参数定义
-	addBlockData := addBlockCmd.String("data", "", "block data")
-	getBalanceAddress := getBalanceCmd.String("address", "", "address balance")
 
 	switch os.Args[1] {
 

@@ -92,41 +92,53 @@ func NewCoinbaseTX(to string, data string) *Transaction {
 }
 
 // 创建普通转账交易
-func NewTransaction(from, to string, amount int64, bc *BlockChain) *Transaction {
+func NewTransaction(
+	from string,
+	to string,
+	amount int64,
+	bc *BlockChain,
+) *Transaction {
 
-	utxos, calc := bc.FindNeedUTXOs(from, amount)
+	// 查找需要的UTXO
+	utxos, total := bc.FindNeedUTXOs(
+		from,
+		amount,
+	)
 
-	if calc < amount {
-		fmt.Println("余额不足")
+	// 余额不足
+	if total < amount {
+		fmt.Printf(
+			"余额不足, current=%d, need=%d\n",
+			total,
+			amount,
+		)
 		return nil
 	}
 
 	var inputs []TXInput
 	var outputs []TXOutput
 
-	// 构造 Inputs(map的range返回（key,value）)
-	for txid, indexes := range utxos {
-		for _, idx := range indexes {
-			input := TXInput{
-				TXID:      []byte(txid),
-				Index:     int64(idx),
-				Signature: from,
-			}
+	// 构造 Inputs
+	for _, utxo := range utxos {
 
-			inputs = append(inputs, input)
-		}
+		inputs = append(inputs, TXInput{
+			TXID:      utxo.TXID,
+			Index:     utxo.Index,
+			Signature: from,
+		})
 	}
 
-	// 转账输出
+	// 收款输出
 	outputs = append(outputs, TXOutput{
 		Value:      amount,
 		PubKeyHash: to,
 	})
 
-	// 找零
-	if calc > amount {
+	// 找零输出
+	if total > amount {
+
 		outputs = append(outputs, TXOutput{
-			Value:      calc - amount,
+			Value:      total - amount,
 			PubKeyHash: from,
 		})
 	}
