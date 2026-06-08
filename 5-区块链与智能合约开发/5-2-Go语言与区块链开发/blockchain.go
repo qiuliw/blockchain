@@ -98,6 +98,13 @@ func GenesisBlock(to string) *Block {
 // 添加区块
 func (bc *BlockChain) AddBlock(txs []*Transaction) {
 
+	// 为每笔交易补齐 TXID
+	for _, tx := range txs {
+		if len(tx.TXID) == 0 {
+			tx.TXID = tx.Hash()
+		}
+	}
+
 	// 动态计算前一个区块的哈希
 	prevHash := bc.tail
 
@@ -172,9 +179,164 @@ func (bc *BlockChain) PrintChain() {
 
 		fmt.Println()
 
-		// 创世区块
+		// 当前创世区块
 		if len(block.PrevHash) == 0 {
 			break
 		}
 	}
+}
+
+// 统计所关联的可用 UTXOs
+// input 是output 配对的出口，且指向output
+// 统计所关联的可用 UTXOs（只查余额，极简版）
+// 正确版本：逆序区块 + 内部正序交易
+// 先处理 Output → 后处理 Input
+func (bc *BlockChain) FindUTXOs(address string) []TXOutput {
+	var utxos []TXOutput
+
+	// 已花费的输出记录
+	spentOutputs := make(map[string]map[int64]bool)
+
+	it := bc.NewIterator()
+
+	// 区块正序（output被缓冲，可能跨区未配对）output可能永不配对被缓冲
+	// 交易正序 对input判断配对，对output判断无意义，因为之后才会出现。（output缓冲块间，可能之后被消费或余下，input一定被消耗光无缓冲）
+	// 交易逆序 对output判断配对，对input判断无意义，因为之后才会出现。（input缓冲块内，之后匹配output，一定被消耗光） 对于 input，总存在output在前，区间结束，之前的output总被遍历完。
+
+	// 区块逆序（input被缓冲，可能跨区未匹配）output可能永不配对被缓冲
+	// 缓冲input，可能之后output，指向上一区块
+	// 交易正序 对input判断配对，对output判断无意义，因为之后才会出现（output缓冲块间，之后input匹配，可能余下。input可能未匹配完）
+	// 交易逆序 对output判断配对，对input判断无意义，因为之后才会出现（input缓冲块间，可能之后才匹配）
+
+	// 缓冲先出现的一个，在另一个判断匹配。
+	// output总被缓冲，因为可能用不被配对。
+
+	// 总之，可以都缓冲
+	for {
+		// 区块 逆序
+		block := it.Next()
+
+		// 交易：正序遍历
+		for _, tx := range block.Transactions {
+			txID := string(tx.TXID)
+
+			// 收集 output
+			for idx, out := range tx.TXOutputs {
+				// 只看属于目标地址的
+				if out.PubKeyHash == address {
+					// 判断是否已经被花掉
+					spent := false
+					if spentOutputs[txID] != nil {
+						spent = spentOutputs[txID][int64(idx)]
+					}
+					// 未花费 → 加入余额
+					if !spent {
+						utxos = append(utxos, out)
+					}
+				}
+			}
+
+			// 跳过 coinbase 的 input
+			if tx.IsCoinbase() {
+				continue
+			}
+
+			// 处理 INPUT
+			// 只有 input 指向 output。要遍历 input 判断是否指向 output
+			for _, in := range tx.TXInputs {
+
+				refTxID := string(in.TXID)
+				index := in.Index
+				if spentOutputs[refTxID] == nil {
+					spentOutputs[refTxID] = make(map[int64]bool)
+				}
+				// 标记：这个 Output 已经被花了
+				spentOutputs[refTxID][index] = true
+			}
+		}
+
+		// 创世块结束
+		if len(block.PrevHash) == 0 {
+			break
+		}
+	}
+
+	return utxos
+}
+
+// 获取够用的 UTXOs集合
+func (bc *BlockChain) FindNeedUTXOs(
+	address string,
+	amount int64,
+) (map[string][]uint64, int64) {
+
+	utxos := make(map[string][]uint64)
+
+	var calc int64
+
+	spentOutputs := make(map[string]map[int64]bool)
+
+	it := bc.NewIterator()
+
+	for {
+
+		block := it.Next()
+
+		for _, tx := range block.Transactions {
+
+			txID := string(tx.TXID)
+
+			// 内部正序先处理 Output
+			for idx, out := range tx.TXOutputs {
+
+				if out.PubKeyHash != address {
+					continue
+				}
+
+				spent := false
+				if spentOutputs[txID] != nil {
+					spent = spentOutputs[txID][int64(idx)] // 不存在则返回零值 false
+				}
+
+				if spent {
+					continue
+				}
+
+				utxos[txID] = append(
+					utxos[txID],
+					uint64(idx),
+				)
+
+				calc += out.Value
+
+				// 金额够用，结束
+				if calc >= amount {
+					return utxos, calc
+				}
+			}
+
+			if tx.IsCoinbase() {
+				continue
+			}
+
+			// 再处理 Input
+			for _, in := range tx.TXInputs {
+
+				refTxID := string(in.TXID)
+
+				if spentOutputs[refTxID] == nil {
+					spentOutputs[refTxID] =
+						make(map[int64]bool)
+				}
+
+				spentOutputs[refTxID][in.Index] = true
+			}
+		}
+
+		if len(block.PrevHash) == 0 {
+			break
+		}
+	}
+
+	return utxos, calc
 }
