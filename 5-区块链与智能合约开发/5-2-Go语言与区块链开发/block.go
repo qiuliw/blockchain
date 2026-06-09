@@ -131,8 +131,14 @@ func Uint64ToBytes(num uint64) []byte {
 	return buf
 }
 
-// 模拟 MerkelRoot，真实是对交易hash做二叉树
+// 对交易hash做二叉树
 func (b *Block) MakeMerkelRoot() []byte {
-	// TODO
-	return []byte{}
+
+	var info []byte
+	for _, tx := range b.Transactions {
+		info = append(info, tx.TXID...)
+	}
+	hash := sha256.Sum256(info)
+
+	return hash[:]
 }

@@ -22,13 +22,10 @@ func (bc *BlockChain) FindUTXORecords(address string) []UTXORecord {
 		block := it.Next() // 区块逆序
 
 		// 逆 正 同时判断，只input 会遗漏前区块。
-
 		// 正，逆 同时判断，只 output 会遗漏后区块。
-
 		// 只正正，逆逆，可以只判断一个
 
-		// 交易逆序
-		for i := len(block.Transactions) - 1; i >= 0; i-- {
+		for i := len(block.Transactions) - 1; i >= 0; i-- { // 交易逆序
 
 			tx := block.Transactions[i]
 
