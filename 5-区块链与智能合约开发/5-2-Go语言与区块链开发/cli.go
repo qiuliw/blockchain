@@ -195,4 +195,6 @@ func (cli *CLI) NewWallet() {
 	}
 	fmt.Printf("PrivateKey: %v\n", wallet.PrivateKey)
 	fmt.Printf("PublicKey: %v\n", wallet.PublicKey)
+
+	fmt.Printf("Address: %v\n", wallet.GetAddress())
 }
