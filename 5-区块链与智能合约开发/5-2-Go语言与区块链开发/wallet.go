@@ -2,8 +2,7 @@ package main
 
 import (
 	"bytes"
-	"crypto/ecdsa"
-	"crypto/elliptic"
+	"crypto/ecdh"
 	"crypto/rand"
 	"crypto/sha256"
 
@@ -18,33 +17,32 @@ const (
 
 // Wallet 钱包
 type Wallet struct {
-	// 私钥
-	PrivateKey *ecdsa.PrivateKey
-
-	// 公钥(未压缩格式)
-	PublicKey []byte
+	PrivateKey []byte // PKCS8 / EC Private Key
+	PublicKey  []byte // compressed/uncompressed pubkey
 }
 
-// NewWallet 创建钱包
-func NewWallet() *Wallet {
+// 创建钱包
+func NewWallet() (*Wallet, error) {
 
-	privateKey, err := ecdsa.GenerateKey(
-		elliptic.P256(),
-		rand.Reader,
-	)
-	if err != nil {
-		return nil
-	}
+	curve := ecdh.P256()
 
-	pubKeyBytes, err := privateKey.PublicKey.Bytes()
+	priv, err := curve.GenerateKey(rand.Reader)
 	if err != nil {
-		return nil
+		return nil, err
 	}
 
 	return &Wallet{
-		PrivateKey: privateKey,
-		PublicKey:  pubKeyBytes,
-	}
+		PrivateKey: priv.Bytes(), // 标准字节
+		PublicKey:  priv.PublicKey().Bytes(),
+	}, nil
+}
+
+// 恢复私钥
+func (w *Wallet) Private() (*ecdh.PrivateKey, error) {
+
+	curve := ecdh.P256()
+
+	return curve.NewPrivateKey(w.PrivateKey)
 }
 
 // HashPubKey

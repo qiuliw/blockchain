@@ -15,10 +15,11 @@ addBlock --data DATA                                              "add data to b
 printChain                                                        "print all blockchain data"
 getBalance --address ADDRESS                                      "get blockchain address balance"
 send --from FROM --to TO --amount AMOUNT --miner MINER [--data]   "send coin from one address to another"
-newWallet                                                        "new wallet"
-`
 
-// send [--data] coinbase 附带数据
+newWallet                                                         "create wallet"
+listAddresses                                                     "show all wallet addresses"
+
+`
 
 // Run 入口
 func (cli *CLI) Run() {
@@ -33,48 +34,72 @@ func (cli *CLI) Run() {
 	printChainCmd := flag.NewFlagSet("printChain", flag.ExitOnError)
 	getBalanceCmd := flag.NewFlagSet("getBalance", flag.ExitOnError)
 	sendCmd := flag.NewFlagSet("send", flag.ExitOnError)
-	newWalletCmd := flag.NewFlagSet("newWallet", flag.ExitOnError)
 
-	// 参数定义
-	addBlockData := addBlockCmd.String("data", "", "block data")
-	getBalanceAddress := getBalanceCmd.String("address", "", "address balance")
-	sendFrom := sendCmd.String("from", "", "source address")
-	sendTo := sendCmd.String("to", "", "destination address")
-	sendAmount := sendCmd.Int64("amount", 0, "transfer amount")
-	sendMiner := sendCmd.String("miner", "", "miner address")
-	sendData := sendCmd.String("data", "", "miner data")
+	newWalletCmd := flag.NewFlagSet("newWallet", flag.ExitOnError)
+	listAddressesCmd := flag.NewFlagSet("listAddresses", flag.ExitOnError)
+
+	// 参数
+	addBlockData := addBlockCmd.String(
+		"data",
+		"",
+		"block data",
+	)
+
+	getBalanceAddress := getBalanceCmd.String(
+		"address",
+		"",
+		"wallet address",
+	)
+
+	sendFrom := sendCmd.String(
+		"from",
+		"",
+		"source address",
+	)
+
+	sendTo := sendCmd.String(
+		"to",
+		"",
+		"destination address",
+	)
+
+	sendAmount := sendCmd.Int64(
+		"amount",
+		0,
+		"transfer amount",
+	)
+
+	sendMiner := sendCmd.String(
+		"miner",
+		"",
+		"miner address",
+	)
+
+	sendData := sendCmd.String(
+		"data",
+		"",
+		"coinbase data",
+	)
 
 	switch os.Args[1] {
 
 	case "addBlock":
-		err := addBlockCmd.Parse(os.Args[2:])
-		if err != nil {
-			panic(err)
-		}
+		_ = addBlockCmd.Parse(os.Args[2:])
 
 	case "printChain":
-		err := printChainCmd.Parse(os.Args[2:])
-		if err != nil {
-			panic(err)
-		}
+		_ = printChainCmd.Parse(os.Args[2:])
 
 	case "getBalance":
-		err := getBalanceCmd.Parse(os.Args[2:])
-		if err != nil {
-			panic(err)
-		}
+		_ = getBalanceCmd.Parse(os.Args[2:])
 
 	case "send":
-		err := sendCmd.Parse(os.Args[2:])
-		if err != nil {
-			panic(err)
-		}
+		_ = sendCmd.Parse(os.Args[2:])
 
 	case "newWallet":
-		err := newWalletCmd.Parse(os.Args[2:])
-		if err != nil {
-			panic(err)
-		}
+		_ = newWalletCmd.Parse(os.Args[2:])
+
+	case "listAddresses":
+		_ = listAddressesCmd.Parse(os.Args[2:])
 
 	default:
 		fmt.Print(Usage)
@@ -90,8 +115,10 @@ func (cli *CLI) Run() {
 		}
 
 		cli.bc.AddBlock([]*Transaction{
-			// to
-			NewCoinbaseTX("cli-user", *addBlockData),
+			NewCoinbaseTX(
+				"cli-user",
+				*addBlockData,
+			),
 		})
 
 		fmt.Println("add block success")
@@ -106,13 +133,18 @@ func (cli *CLI) Run() {
 	if getBalanceCmd.Parsed() {
 
 		if *getBalanceAddress == "" {
-			fmt.Println("error: please input address")
+
+			fmt.Println(
+				"error: please input address",
+			)
+
 			os.Exit(1)
 		}
 
 		cli.GetBalance(*getBalanceAddress)
 	}
 
+	// send
 	if sendCmd.Parsed() {
 
 		if *sendFrom == "" ||
@@ -120,7 +152,10 @@ func (cli *CLI) Run() {
 			*sendMiner == "" ||
 			*sendAmount <= 0 {
 
-			fmt.Println("error: invalid send arguments")
+			fmt.Println(
+				"error: invalid send arguments",
+			)
+
 			os.Exit(1)
 		}
 
@@ -133,11 +168,18 @@ func (cli *CLI) Run() {
 		)
 	}
 
+	// newWallet
 	if newWalletCmd.Parsed() {
 		cli.NewWallet()
 	}
+
+	// listAddresses
+	if listAddressesCmd.Parsed() {
+		cli.ListAddresses()
+	}
 }
 
+// 查询余额
 func (cli *CLI) GetBalance(address string) {
 
 	utxos := cli.bc.FindUTXOs(address)
@@ -148,9 +190,14 @@ func (cli *CLI) GetBalance(address string) {
 		balance += out.Value
 	}
 
-	fmt.Printf("Balance of %s: %d\n", address, balance)
+	fmt.Printf(
+		"Balance of %s: %d\n",
+		address,
+		balance,
+	)
 }
 
+// 转账
 func (cli *CLI) Send(
 	from string,
 	to string,
@@ -159,7 +206,6 @@ func (cli *CLI) Send(
 	data string,
 ) {
 
-	// 普通转账交易
 	tx := NewTransaction(
 		from,
 		to,
@@ -168,33 +214,62 @@ func (cli *CLI) Send(
 	)
 
 	if tx == nil {
-		fmt.Println("transaction create failed")
+
+		fmt.Println(
+			"transaction create failed",
+		)
+
 		return
 	}
 
-	// 挖矿奖励交易(简化)
 	coinbase := NewCoinbaseTX(
 		miner,
 		data,
 	)
 
-	// 打包新区块
-	cli.bc.AddBlock([]*Transaction{
-		coinbase,
-		tx,
-	})
+	cli.bc.AddBlock(
+		[]*Transaction{
+			coinbase,
+			tx,
+		},
+	)
 
 	fmt.Println("send success")
 }
 
+// 创建钱包
 func (cli *CLI) NewWallet() {
-	wallet := NewWallet()
-	if wallet == nil {
-		fmt.Println("new wallet failed")
+
+	wallets := NewWallets()
+
+	address := wallets.CreateWallet()
+
+	fmt.Println("wallet created")
+	fmt.Println("address:", address)
+}
+
+// 显示所有钱包地址
+func (cli *CLI) ListAddresses() {
+
+	wallets := NewWallets()
+
+	addresses := wallets.GetAddresses()
+
+	if len(addresses) == 0 {
+
+		fmt.Println("no wallet")
+
 		return
 	}
-	fmt.Printf("PrivateKey: %v\n", wallet.PrivateKey)
-	fmt.Printf("PublicKey: %v\n", wallet.PublicKey)
 
-	fmt.Printf("Address: %v\n", wallet.GetAddress())
+	fmt.Println("wallet addresses:")
+
+	for i, address := range addresses {
+
+		fmt.Printf(
+			"%d. %s\n",
+			i+1,
+			address,
+		)
+	}
 }
