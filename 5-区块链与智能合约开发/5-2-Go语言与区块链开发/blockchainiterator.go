@@ -3,22 +3,21 @@ package main
 import "go.etcd.io/bbolt"
 
 // 定义迭代器
-type BlockChainIterator struct {
+type BlockchainIterator struct {
 	db          *bbolt.DB
 	currentHash []byte
 }
 
 // 创建迭代器
-func (bc *BlockChain) NewIterator() *BlockChainIterator {
+func (bc *Blockchain) NewIterator() *BlockchainIterator {
 
-	return &BlockChainIterator{
+	return &BlockchainIterator{
 		db:          bc.db,
 		currentHash: bc.tail,
 	}
 }
 
-// 获取当前区块并移动到前一个区块
-func (it *BlockChainIterator) Next() *Block {
+func (it *BlockchainIterator) Next() *Block {
 
 	var block *Block
 

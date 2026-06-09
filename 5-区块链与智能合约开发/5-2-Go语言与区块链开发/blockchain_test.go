@@ -5,16 +5,22 @@ import (
 	"testing"
 )
 
-func TestFindUTXOs(t *testing.T) {
+func TestFindUTXO(t *testing.T) {
 	_ = os.Remove(blockChainDB)
+	_ = os.Remove(walletFile)
 
-	bc := NewBlockChain("miner")
+	wallets := NewWallets()
+	miner := wallets.CreateWallet()
+	alice := wallets.CreateWallet()
+
+	bc := NewBlockchain(miner)
 	defer func() {
 		bc.db.Close()
 		_ = os.Remove(blockChainDB)
+		_ = os.Remove(walletFile)
 	}()
 
-	utxos := bc.FindUTXOs("miner")
+	utxos := bc.FindUTXO(miner)
 	if len(utxos) != 1 {
 		t.Fatalf("expected 1 UTXO for miner, got %d", len(utxos))
 	}
@@ -22,26 +28,15 @@ func TestFindUTXOs(t *testing.T) {
 		t.Fatalf("expected miner UTXO value %d, got %d", reward, utxos[0].Value)
 	}
 
-	genesisTX := NewCoinbaseTX("miner", genesisInfo)
-
-	spendTx := &Transaction{
-		TXInputs: []TXInput{
-			{
-				TXID:      genesisTX.TXID,
-				Index:     0,
-				Signature: "miner",
-			},
-		},
-		TXOutputs: []TXOutput{
-			{Value: 5, PubKeyHash: "alice"},
-			{Value: reward - 5, PubKeyHash: "miner"},
-		},
+	wallet := wallets.GetWallet(miner)
+	tx := NewUTXOTransaction(wallet, alice, 5, bc)
+	if tx == nil {
+		t.Fatal("failed to create transaction")
 	}
-	spendTx.TXID = spendTx.Hash()
 
-	bc.AddBlock([]*Transaction{spendTx})
+	bc.AddBlock([]*Transaction{tx})
 
-	minerUTXOs := bc.FindUTXOs("miner")
+	minerUTXOs := bc.FindUTXO(miner)
 	if len(minerUTXOs) != 1 {
 		t.Fatalf("expected 1 UTXO for miner after spend, got %d", len(minerUTXOs))
 	}
@@ -49,7 +44,7 @@ func TestFindUTXOs(t *testing.T) {
 		t.Fatalf("expected miner UTXO value %d after spend, got %d", reward-5, minerUTXOs[0].Value)
 	}
 
-	aliceUTXOs := bc.FindUTXOs("alice")
+	aliceUTXOs := bc.FindUTXO(alice)
 	if len(aliceUTXOs) != 1 {
 		t.Fatalf("expected 1 UTXO for alice, got %d", len(aliceUTXOs))
 	}
@@ -60,21 +55,28 @@ func TestFindUTXOs(t *testing.T) {
 
 func TestNewTransaction(t *testing.T) {
 	_ = os.Remove(blockChainDB)
+	_ = os.Remove(walletFile)
 
-	bc := NewBlockChain("miner")
+	wallets := NewWallets()
+	miner := wallets.CreateWallet()
+	alice := wallets.CreateWallet()
+
+	bc := NewBlockchain(miner)
 	defer func() {
 		bc.db.Close()
 		_ = os.Remove(blockChainDB)
+		_ = os.Remove(walletFile)
 	}()
 
-	tx := NewTransaction("miner", "alice", 5, bc)
+	wallet := wallets.GetWallet(miner)
+	tx := NewUTXOTransaction(wallet, alice, 5, bc)
 	if tx == nil {
 		t.Fatal("expected transaction, got nil")
 	}
 
 	bc.AddBlock([]*Transaction{tx})
 
-	minerUTXOs := bc.FindUTXOs("miner")
+	minerUTXOs := bc.FindUTXO(miner)
 	if len(minerUTXOs) != 1 {
 		t.Fatalf("expected 1 UTXO for miner after transfer, got %d", len(minerUTXOs))
 	}
@@ -82,11 +84,11 @@ func TestNewTransaction(t *testing.T) {
 		t.Fatalf("expected miner UTXO value %d after transfer, got %d", reward-5, minerUTXOs[0].Value)
 	}
 
-	aliceUTXOs := bc.FindUTXOs("alice")
+	aliceUTXOs := bc.FindUTXO(alice)
 	if len(aliceUTXOs) != 1 {
 		t.Fatalf("expected 1 UTXO for alice after transfer, got %d", len(aliceUTXOs))
 	}
 	if aliceUTXOs[0].Value != 5 {
-		t.Fatalf("expected alice UTXO value 5 after transfer, got %d", aliceUTXOs[0].Value)
+		t.Fatalf("expected alice UTXO value 5, got %d", aliceUTXOs[0].Value)
 	}
 }

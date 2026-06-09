@@ -7,7 +7,7 @@ import (
 )
 
 type CLI struct {
-	bc *BlockChain
+	bc *Blockchain
 }
 
 const Usage = `
@@ -182,7 +182,7 @@ func (cli *CLI) Run() {
 // 查询余额
 func (cli *CLI) GetBalance(address string) {
 
-	utxos := cli.bc.FindUTXOs(address)
+	utxos := cli.bc.FindUTXO(address)
 
 	var balance int64
 
@@ -206,19 +206,22 @@ func (cli *CLI) Send(
 	data string,
 ) {
 
-	tx := NewTransaction(
-		from,
+	wallets := NewWallets()
+	wallet := wallets.GetWallet(from)
+	if wallet == nil {
+		fmt.Println("transaction create failed: from address wallet not found")
+		return
+	}
+
+	tx := NewUTXOTransaction(
+		wallet,
 		to,
 		amount,
 		cli.bc,
 	)
 
 	if tx == nil {
-
-		fmt.Println(
-			"transaction create failed",
-		)
-
+		fmt.Println("transaction create failed")
 		return
 	}
 

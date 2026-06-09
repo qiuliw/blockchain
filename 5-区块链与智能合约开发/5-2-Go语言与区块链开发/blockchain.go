@@ -1,13 +1,16 @@
 package main
 
 import (
+	"bytes"
+	"crypto/ecdsa"
+	"encoding/hex"
 	"fmt"
 
 	"go.etcd.io/bbolt"
 )
 
 // 引入区块链
-type BlockChain struct {
+type Blockchain struct {
 	// blocks []*Block // 区块数组
 	db   *bbolt.DB
 	tail []byte // 存储最后一个区块的hash值
@@ -19,7 +22,7 @@ const lastHashKey = "LastHash"
 const genesisInfo = "创世信息"
 
 // 创建一个区块链
-func NewBlockChain(to string) *BlockChain {
+func NewBlockchain(to string) *Blockchain {
 
 	// 打开数据库
 	db, err := bbolt.Open(blockChainDB, 0600, nil)
@@ -82,7 +85,7 @@ func NewBlockChain(to string) *BlockChain {
 		panic(err)
 	}
 
-	return &BlockChain{
+	return &Blockchain{
 		db:   db,
 		tail: tail,
 	}
@@ -95,13 +98,69 @@ func GenesisBlock(to string) *Block {
 	return NewBlock([]*Transaction{coinbase}, []byte{})
 }
 
-// 添加区块
-func (bc *BlockChain) AddBlock(txs []*Transaction) {
+// 查找指定交易
+func (bc *Blockchain) FindTransaction(id []byte) (*Transaction, error) {
+	it := bc.NewIterator()
 
-	// 为每笔交易补齐 TXID
+	for {
+		block := it.Next()
+		for _, tx := range block.Transactions {
+			if bytes.Equal(tx.ID, id) {
+				return tx, nil
+			}
+		}
+
+		if len(block.PrevHash) == 0 {
+			break
+		}
+	}
+
+	return nil, fmt.Errorf("transaction %x not found", id)
+}
+
+// 签名交易
+func (bc *Blockchain) SignTransaction(tx *Transaction, privKey *ecdsa.PrivateKey) {
+	prevTXs := make(map[string]Transaction)
+
+	for _, vin := range tx.Vin {
+		prevTx, err := bc.FindTransaction(vin.Txid)
+		if err != nil {
+			panic(err)
+		}
+		prevTXs[hex.EncodeToString(prevTx.ID)] = *prevTx
+	}
+
+	tx.Sign(*privKey, prevTXs)
+}
+
+// 验证交易合法性
+func (bc *Blockchain) VerifyTransaction(tx *Transaction) bool {
+	if tx.IsCoinbase() {
+		return true
+	}
+
+	prevTXs := make(map[string]Transaction)
+
+	for _, vin := range tx.Vin {
+		prevTx, err := bc.FindTransaction(vin.Txid)
+		if err != nil {
+			panic(err)
+		}
+		prevTXs[hex.EncodeToString(prevTx.ID)] = *prevTx
+	}
+
+	return tx.Verify(prevTXs)
+}
+
+// 添加区块
+func (bc *Blockchain) AddBlock(txs []*Transaction) {
+
 	for _, tx := range txs {
-		if len(tx.TXID) == 0 {
-			tx.TXID = tx.Hash()
+		if len(tx.ID) == 0 {
+			tx.ID = tx.Hash()
+		}
+		if bc.VerifyTransaction(tx) != true {
+			panic("ERROR: Invalid transaction")
 		}
 	}
 
@@ -151,7 +210,7 @@ func (bc *BlockChain) AddBlock(txs []*Transaction) {
 }
 
 // 打印区块链
-func (bc *BlockChain) PrintChain() {
+func (bc *Blockchain) PrintChain() {
 
 	it := bc.NewIterator()
 
@@ -171,7 +230,9 @@ func (bc *BlockChain) PrintChain() {
 
 		fmt.Printf("Difficulty: %d\n", block.Difficulty)
 
-		fmt.Printf("Data: %s\n", block.Transactions[0].TXInputs[0].Signature)
+		if len(block.Transactions) > 0 && len(block.Transactions[0].Vin) > 0 {
+			fmt.Printf("Data: %x\n", block.Transactions[0].Vin[0].PubKey)
+		}
 
 		// 工作量合法性验证
 		pow := NewProofOfWork(block)
@@ -191,7 +252,7 @@ func (bc *BlockChain) PrintChain() {
 // 统计所关联的可用 UTXOs（只查余额，极简版）
 // 正确版本：逆序区块 + 内部正序交易
 // 先处理 Output → 后处理 Input
-func (bc *BlockChain) FindUTXOs(address string) []TXOutput {
+func (bc *Blockchain) FindUTXO(address string) []TXOutput {
 	var utxos []TXOutput
 
 	// 已花费的输出记录
@@ -218,12 +279,13 @@ func (bc *BlockChain) FindUTXOs(address string) []TXOutput {
 
 		// 交易：正序遍历
 		for _, tx := range block.Transactions {
-			txID := string(tx.TXID)
+			txID := string(tx.ID)
+			pubKeyHash := GetPubKeyHashFromAddress(address)
 
 			// 收集 output
-			for idx, out := range tx.TXOutputs {
+			for idx, out := range tx.Vout {
 				// 只看属于目标地址的
-				if out.PubKeyHash == address {
+				if out.IsLockedWithKey(pubKeyHash) {
 					// 判断是否已经被花掉
 					spent := false
 					if spentOutputs[txID] != nil {
@@ -236,22 +298,21 @@ func (bc *BlockChain) FindUTXOs(address string) []TXOutput {
 				}
 			}
 
-			// 跳过 coinbase 的 input
 			if tx.IsCoinbase() {
 				continue
 			}
 
 			// 处理 INPUT
 			// 只有 input 指向 output。要遍历 input 判断是否指向 output
-			for _, in := range tx.TXInputs {
+			for _, in := range tx.Vin {
 
-				refTxID := string(in.TXID)
-				index := in.Index
+				refTxID := string(in.Txid)
+				index := in.Vout
 				if spentOutputs[refTxID] == nil {
 					spentOutputs[refTxID] = make(map[int64]bool)
 				}
 				// 标记：这个 Output 已经被花了
-				spentOutputs[refTxID][index] = true
+				spentOutputs[refTxID][int64(index)] = true
 			}
 		}
 

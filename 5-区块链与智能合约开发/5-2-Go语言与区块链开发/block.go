@@ -136,7 +136,7 @@ func (b *Block) MakeMerkelRoot() []byte {
 
 	var info []byte
 	for _, tx := range b.Transactions {
-		info = append(info, tx.TXID...)
+		info = append(info, tx.ID...)
 	}
 	hash := sha256.Sum256(info)
 

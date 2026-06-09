@@ -3,17 +3,17 @@ package main
 // 维护可用 uxto
 
 type UTXORecord struct {
-	TXID   []byte
-	Index  int64
+	ID     []byte
+	Index  int
 	Output TXOutput
 }
 
 // 查找所有可用 UTXO
-func (bc *BlockChain) FindUTXORecords(address string) []UTXORecord {
+func (bc *Blockchain) FindUTXORecords(address string) []UTXORecord {
 
 	var records []UTXORecord
 
-	spentOutputs := make(map[string]map[int64]bool)
+	spentOutputs := make(map[string]map[int]bool)
 
 	it := bc.NewIterator()
 
@@ -29,19 +29,20 @@ func (bc *BlockChain) FindUTXORecords(address string) []UTXORecord {
 
 			tx := block.Transactions[i]
 
-			txID := string(tx.TXID)
+			txID := string(tx.ID)
 
+			pubKeyHash := GetPubKeyHashFromAddress(address)
 			// Output
-			for idx, out := range tx.TXOutputs {
+			for idx, out := range tx.Vout {
 
-				if out.PubKeyHash != address {
+				if !out.IsLockedWithKey(pubKeyHash) {
 					continue
 				}
 
 				spent := false
 
 				if spentOutputs[txID] != nil {
-					spent = spentOutputs[txID][int64(idx)]
+					spent = spentOutputs[txID][idx]
 				}
 
 				if spent {
@@ -49,8 +50,8 @@ func (bc *BlockChain) FindUTXORecords(address string) []UTXORecord {
 				}
 
 				records = append(records, UTXORecord{
-					TXID:   tx.TXID,
-					Index:  int64(idx),
+					ID:   tx.ID,
+					Index:  idx,
 					Output: out,
 				})
 			}
@@ -60,16 +61,16 @@ func (bc *BlockChain) FindUTXORecords(address string) []UTXORecord {
 			}
 
 			// Input
-			for _, in := range tx.TXInputs {
+			for _, in := range tx.Vin {
 
-				refTxID := string(in.TXID)
+				refTxID := string(in.Txid)
 
 				if spentOutputs[refTxID] == nil {
 					spentOutputs[refTxID] =
-						make(map[int64]bool)
+						make(map[int]bool)
 				}
 
-				spentOutputs[refTxID][in.Index] = true
+				spentOutputs[refTxID][in.Vout] = true
 			}
 		}
 
@@ -82,7 +83,7 @@ func (bc *BlockChain) FindUTXORecords(address string) []UTXORecord {
 }
 
 // 获取够用的 UTXOs集合
-func (bc *BlockChain) FindNeedUTXOs(
+func (bc *Blockchain) FindSpendableOutputs(
 	address string,
 	amount int64,
 ) ([]UTXORecord, int64) {
@@ -107,7 +108,7 @@ func (bc *BlockChain) FindNeedUTXOs(
 }
 
 // 对所有UTXO求和
-func (bc *BlockChain) GetBalance(address string) int64 {
+func (bc *Blockchain) GetBalance(address string) int64 {
 
 	records := bc.FindUTXORecords(address)
 

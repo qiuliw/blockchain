@@ -2,9 +2,11 @@ package main
 
 import (
 	"bytes"
-	"crypto/ecdh"
+	"crypto/ecdsa"
+	"crypto/elliptic"
 	"crypto/rand"
 	"crypto/sha256"
+	"math/big"
 
 	"github.com/btcsuite/btcutil/base58"
 	"golang.org/x/crypto/ripemd160"
@@ -17,44 +19,45 @@ const (
 
 // Wallet 钱包
 type Wallet struct {
-	PrivateKey []byte // PKCS8 / EC Private Key
-	PublicKey  []byte // compressed/uncompressed pubkey
+	PrivateKey []byte // 私钥 D 值
+	PublicKey  []byte // 公钥 X||Y 字节
 }
 
 // 创建钱包
 func NewWallet() (*Wallet, error) {
+	curve := elliptic.P256()
 
-	curve := ecdh.P256()
-
-	priv, err := curve.GenerateKey(rand.Reader)
+	priv, err := ecdsa.GenerateKey(curve, rand.Reader)
 	if err != nil {
 		return nil, err
 	}
 
+	pubKey := append(priv.PublicKey.X.Bytes(), priv.PublicKey.Y.Bytes()...)
+
 	return &Wallet{
-		PrivateKey: priv.Bytes(), // 标准字节
-		PublicKey:  priv.PublicKey().Bytes(),
+		PrivateKey: priv.D.Bytes(),
+		PublicKey:  pubKey,
 	}, nil
 }
 
-// 恢复私钥
-func (w *Wallet) Private() (*ecdh.PrivateKey, error) {
+// Private 恢复 ECDSA 私钥
+func (w *Wallet) Private() (*ecdsa.PrivateKey, error) {
+	curve := elliptic.P256()
+	d := new(big.Int).SetBytes(w.PrivateKey)
+	x, y := curve.ScalarBaseMult(w.PrivateKey)
 
-	curve := ecdh.P256()
-
-	return curve.NewPrivateKey(w.PrivateKey)
+	return &ecdsa.PrivateKey{
+		PublicKey: ecdsa.PublicKey{Curve: curve, X: x, Y: y},
+		D:         d,
+	}, nil
 }
 
 // HashPubKey
-//
-// HASH160(pubKey)
-// = RIPEMD160(SHA256(pubKey)) 两次hash缩短长度，便于填写转账
+// HASH160(pubKey) = RIPEMD160(SHA256(pubKey))
 func HashPubKey(pubKey []byte) []byte {
-
 	shaHash := sha256.Sum256(pubKey)
 
 	hasher := ripemd160.New()
-
 	_, err := hasher.Write(shaHash[:])
 	if err != nil {
 		panic(err)
@@ -63,68 +66,50 @@ func HashPubKey(pubKey []byte) []byte {
 	return hasher.Sum(nil)
 }
 
-// Checksum 防止用户输错地址，得hash和pubhash都错才可能。chechsum（pubKeyHash+version)
-//
-// checksum = SHA256(SHA256(payload))[:4]
+// Checksum 计算地址校验值
 func Checksum(payload []byte) []byte {
-
 	first := sha256.Sum256(payload)
 	second := sha256.Sum256(first[:])
 
 	return second[:checksumLength]
 }
 
+// Base58Decode 解码地址
+func Base58Decode(input string) []byte {
+	return base58.Decode(input)
+}
+
 // GetAddress 生成比特币风格地址
 func (w *Wallet) GetAddress() string {
-
-	// HASH160(PublicKey)
 	pubKeyHash := HashPubKey(w.PublicKey)
-
-	// Version + PubKeyHash
-	versionedPayload := append(
-		[]byte{version},
-		pubKeyHash...,
-	)
-
-	// Checksum
+	versionedPayload := append([]byte{version}, pubKeyHash...)
 	checksum := Checksum(versionedPayload)
+	fullPayload := append(versionedPayload, checksum...)
 
-	// 25字节数据:
-	// 1字节Version
-	// 20字节PubKeyHash
-	// 4字节Checksum
-	fullPayload := append(
-		versionedPayload,
-		checksum...,
-	)
-
-	// Base58编码
 	return base58.Encode(fullPayload)
 }
 
 // ValidateAddress 验证地址是否合法
 func ValidateAddress(address string) bool {
-
 	decoded := base58.Decode(address)
-
 	if len(decoded) < 25 {
 		return false
 	}
 
-	actualChecksum :=
-		decoded[len(decoded)-checksumLength:]
-
+	actualChecksum := decoded[len(decoded)-checksumLength:]
 	version := decoded[0]
+	pubKeyHash := decoded[1 : len(decoded)-checksumLength]
+	targetChecksum := Checksum(append([]byte{version}, pubKeyHash...))
 
-	pubKeyHash :=
-		decoded[1 : len(decoded)-checksumLength]
+	return bytes.Equal(actualChecksum, targetChecksum)
+}
 
-	targetChecksum := Checksum(
-		append([]byte{version}, pubKeyHash...),
-	)
+// GetPubKeyHashFromAddress 解析地址得到公钥哈希
+func GetPubKeyHashFromAddress(address string) []byte {
+	decoded := Base58Decode(address)
+	if len(decoded) < 25 {
+		return nil
+	}
 
-	return bytes.Equal(
-		actualChecksum,
-		targetChecksum,
-	)
+	return decoded[1 : len(decoded)-checksumLength]
 }
