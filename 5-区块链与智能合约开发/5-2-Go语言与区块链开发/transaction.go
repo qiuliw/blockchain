@@ -25,9 +25,9 @@ type Transaction struct {
 // TXInput 表示交易输入
 type TXInput struct {
 	Txid      []byte
-	Vout      int
-	Signature []byte
-	PubKey    []byte
+	Vout      int    // 引用的output的索引
+	Signature []byte // 签名，确认其为公钥持有者
+	PubKey    []byte // 公钥
 }
 
 // TXOutput 表示交易输出
@@ -71,7 +71,7 @@ func (tx *Transaction) IsCoinbase() bool {
 	return len(tx.Vin) == 1 && len(tx.Vin[0].Txid) == 0 && tx.Vin[0].Vout == -1
 }
 
-// TrimmedCopy 创建一个用于签名的精简交易副本，避免无关属性影响交易签名
+// TrimmedCopy 创建一个用于签名的精简交易副本，避免无关属性影响交易签名与自引用
 func (tx *Transaction) TrimmedCopy() Transaction {
 	var inputs []TXInput
 	var outputs []TXOutput
@@ -101,11 +101,12 @@ func (tx *Transaction) Sign(privKey ecdsa.PrivateKey, prevTXs map[string]Transac
 		}
 	}
 
-	txCopy := tx.TrimmedCopy()
+	txCopy := tx.TrimmedCopy() // 创建一个精简交易副本
 
 	for inID, vin := range txCopy.Vin {
-		prevTx := prevTXs[hex.EncodeToString(vin.Txid)]
-		txCopy.Vin[inID].Signature = nil
+		prevTx := prevTXs[hex.EncodeToString(vin.Txid)] // 获取上一笔交易
+		txCopy.Vin[inID].Signature = nil                // 将签名置空
+		// 签名时，input 的 PubKey = output 的 PubKeyHash，表明授权这个锁定的解锁
 		txCopy.Vin[inID].PubKey = prevTx.Vout[vin.Vout].PubKeyHash
 
 		dataToSign := fmt.Sprintf("%x\n", txCopy)
@@ -121,7 +122,7 @@ func (tx *Transaction) Sign(privKey ecdsa.PrivateKey, prevTXs map[string]Transac
 	}
 }
 
-// Verify 验证交易输入签名
+// Verify 验证交易输入签名（需提供当前交易所引用的所有上一笔交易（UTXO来源）的集合）
 func (tx *Transaction) Verify(prevTXs map[string]Transaction) bool {
 	if tx.IsCoinbase() {
 		return true

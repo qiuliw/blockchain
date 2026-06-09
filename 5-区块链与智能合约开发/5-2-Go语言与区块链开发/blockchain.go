@@ -118,7 +118,7 @@ func (bc *Blockchain) FindTransaction(id []byte) (*Transaction, error) {
 	return nil, fmt.Errorf("transaction %x not found", id)
 }
 
-// 签名交易
+// 签名交易，先查找所有依赖的交易
 func (bc *Blockchain) SignTransaction(tx *Transaction, privKey *ecdsa.PrivateKey) {
 	prevTXs := make(map[string]Transaction)
 

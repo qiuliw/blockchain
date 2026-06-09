@@ -50,7 +50,7 @@ func (bc *Blockchain) FindUTXORecords(address string) []UTXORecord {
 				}
 
 				records = append(records, UTXORecord{
-					ID:   tx.ID,
+					ID:     tx.ID,
 					Index:  idx,
 					Output: out,
 				})
