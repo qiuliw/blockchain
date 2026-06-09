@@ -15,6 +15,7 @@ addBlock --data DATA                                              "add data to b
 printChain                                                        "print all blockchain data"
 getBalance --address ADDRESS                                      "get blockchain address balance"
 send --from FROM --to TO --amount AMOUNT --miner MINER [--data]   "send coin from one address to another"
+newWallet                                                        "new wallet"
 `
 
 // send [--data] coinbase 附带数据
@@ -32,6 +33,7 @@ func (cli *CLI) Run() {
 	printChainCmd := flag.NewFlagSet("printChain", flag.ExitOnError)
 	getBalanceCmd := flag.NewFlagSet("getBalance", flag.ExitOnError)
 	sendCmd := flag.NewFlagSet("send", flag.ExitOnError)
+	newWalletCmd := flag.NewFlagSet("newWallet", flag.ExitOnError)
 
 	// 参数定义
 	addBlockData := addBlockCmd.String("data", "", "block data")
@@ -64,6 +66,12 @@ func (cli *CLI) Run() {
 
 	case "send":
 		err := sendCmd.Parse(os.Args[2:])
+		if err != nil {
+			panic(err)
+		}
+
+	case "newWallet":
+		err := newWalletCmd.Parse(os.Args[2:])
 		if err != nil {
 			panic(err)
 		}
@@ -124,6 +132,10 @@ func (cli *CLI) Run() {
 			*sendData,
 		)
 	}
+
+	if newWalletCmd.Parsed() {
+		cli.NewWallet()
+	}
 }
 
 func (cli *CLI) GetBalance(address string) {
@@ -173,4 +185,14 @@ func (cli *CLI) Send(
 	})
 
 	fmt.Println("send success")
+}
+
+func (cli *CLI) NewWallet() {
+	wallet := NewWallet()
+	if wallet == nil {
+		fmt.Println("new wallet failed")
+		return
+	}
+	fmt.Printf("PrivateKey: %v\n", wallet.PrivateKey)
+	fmt.Printf("PublicKey: %v\n", wallet.PublicKey)
 }
