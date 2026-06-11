@@ -2,6 +2,34 @@
 
 以太坊开发是**基于以太坊区块链构建去中心化应用（DApp）**的技术体系，核心是用智能合约实现链上逻辑，搭配前端/后端完成链上交互，是当前Web3开发的核心方向。本文整合行业主流三大开发工具（Remix、Hardhat、Foundry），从核心概念、技术栈、开发框架对比、实操案例、环境搭建、学习路线等维度，提供一套完整、可落地的零基础入门教程。
 
+## 本项目目录结构
+
+```
+HelloFoundry/
+├── .github/                # GitHub Actions 工作流配置
+│   └── workflows/
+│       └── test.yml        # 自动化测试 CI 配置
+├── .gitignore              # Git 忽略文件
+├── .gitmodules             # 子模块配置，管理 forge-std 库
+├── foundry.toml            # Foundry 项目配置
+├── foundry.lock            # Foundry 依赖锁定文件
+├── src/                    # 合约源码目录
+│   └── Counter.sol         # 计数器合约
+├── test/                   # Foundry 测试目录
+│   └── Counter.t.sol       # 合约单元测试
+├── script/                 # Foundry 脚本目录
+│   └── Counter.s.sol       # 部署/交互脚本示例
+├── broadcast/              # forge 脚本广播结果目录
+│   └── Counter.s.sol/
+├── cache/                  # forge 缓存文件目录
+│   └── Counter.s.sol/
+├── lib/                    # 依赖库目录
+│   └── forge-std/          # Foundry 标准库
+├── out/                    # 编译输出目录
+│   └── ... compiled outputs ...
+└── README.md               # 本项目说明文档
+```
+
 ## 一、核心基础概念（必须掌握）
 
 掌握基础概念是以太坊开发的前提，所有开发操作均围绕以下核心定义展开：
@@ -415,3 +443,4 @@ DeFi协议、合约审计、高性能、高安全需求项目
 3. 标准化开发流程：编写→本地测试→测试网验证→主网上线，所有项目通用。
 
 4. 新手学习核心：先掌握Solidity基础，再从Remix入门，逐步过渡到Hardhat、Foundry，兼顾实用性与专业性。
+
