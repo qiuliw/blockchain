@@ -1,0 +1,14 @@
+// 测试命令: FOUNDRY_PROFILE=advanced forge test --match-path "test/advanced/Adv21ErrorHandling.t.sol" -vv
+pragma solidity ^0.8.26;
+
+import {Test as ForgeTest} from "forge-std/Test.sol";
+import "../../eth-basic/21.errorHandling.sol";
+
+contract Adv21ErrorHandlingTest is ForgeTest {
+    // owner 调用 setValue 成功
+    function testSetValueAsOwner() public {
+        Test t = new Test();
+        t.setValue(42);
+        assertEq(t.a(), 42);
+    }
+}

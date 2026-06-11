@@ -1,3 +1,3 @@
-[submodule "5-区块链与智能合约开发/5-4-以太坊-solidity/lib/forge-std"]
-	path = 5-区块链与智能合约开发/5-4-以太坊-solidity/lib/forge-std
+[submodule "5-区块链与智能合约开发/5-4-以太坊-solidity/silidity-examples/lib/forge-std"]
+	path = 5-区块链与智能合约开发/5-4-以太坊-solidity/silidity-examples/lib/forge-std
 	url = https://github.com/foundry-rs/forge-std

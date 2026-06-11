@@ -1,0 +1,12 @@
+# Foundry
+cache/
+out/
+broadcast/
+foundry-out/
+
+# Dependencies (local only; lib/forge-std is a git submodule)
+node_modules/
+
+# Environment
+.env
+.env.*

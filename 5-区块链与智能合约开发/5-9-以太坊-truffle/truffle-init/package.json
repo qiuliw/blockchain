@@ -1,0 +1,13 @@
+{
+  "name": "truffle-init",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "compile": "node node_modules/truffle/build/cli.bundled.js compile",
+    "test": "node node_modules/truffle/build/cli.bundled.js test",
+    "migrate": "node node_modules/truffle/build/cli.bundled.js migrate --network development"
+  },
+  "devDependencies": {
+    "truffle": "5.11.5"
+  }
+}

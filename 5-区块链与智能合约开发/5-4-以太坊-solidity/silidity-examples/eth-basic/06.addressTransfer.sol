@@ -1,0 +1,41 @@
+// 测试命令: forge test --match-path "test/basic/Basic06AddressTransfer.t.sol" -vv
+pragma solidity ^0.8.26;
+
+
+contract  Test {
+
+
+    address public addr0 = address(uint160(0x00ca35b7d915458ef540ade6068dfe2f44e8fa733c));
+    address public addr1 = address(uint160(0x0014723a09acff6d2a60dcdf7aa4aff308fddc160c));
+    
+    
+    //1. 匿名函数：没有函数名，没有参数，没有返回值的函数，就是匿名函数
+    //2. 当调用一个不存在的方法时，合约会默认的去调用匿名函数
+    //3. 匿名函数一般用来给合约转账，因为费用低
+    receive() external payable {
+        
+    }
+    
+    function getBalance() public view returns(uint256) {
+        return addr1.balance;
+    }
+    
+    function getContractBalance() public view returns(uint256) {
+        return address(this).balance;
+    }
+    
+    //由合约向addr1 转账10以太币
+    function transfer() public {
+        //1. 转账的时候单位是wei
+        //2. 1 ether = 10 ^18 wei （10的18次方）
+        //3. 向谁转钱，就用谁调用tranfer函数
+        //4. 花费的是合约的钱
+        //5. 如果金额不足，transfer函数会抛出异常
+        payable(addr1).transfer(10 * 10 **18);
+    }
+    
+    //send转账与tranfer使用方式一致，但是如果转账金额不足，不会抛出异常，而是会返回false
+    function sendTest() public {
+        payable(addr1).send(10 * 10 **18);
+    }
+}

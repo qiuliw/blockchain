@@ -1,0 +1,16 @@
+// 测试命令: forge test --match-path "test/basic/Basic09Bytes.t.sol" -vv
+pragma solidity ^0.8.26;
+
+import {Test as ForgeTest} from "forge-std/Test.sol";
+import "../../smartContracts/09.bytes.sol";
+
+contract Basic09BytesTest is ForgeTest {
+    // bytes 赋值后 push 扩容
+    function testSetAndPush() public {
+        Test t = new Test();
+        t.setValue("abc");
+        assertEq(t.getLen(), 3);
+        t.pushData();
+        assertEq(t.getLen(), 4);
+    }
+}

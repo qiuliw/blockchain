@@ -1,1 +1,16 @@
 *.db
+
+# Node
+**/node_modules/
+
+# Build artifacts
+build/
+**/out/
+**/cache/
+**/broadcast/
+**/foundry-out/
+
+# Environment
+.env
+.env.*
+!.env.example

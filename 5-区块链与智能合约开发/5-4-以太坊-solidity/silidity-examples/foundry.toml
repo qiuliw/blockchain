@@ -1,0 +1,17 @@
+[profile.default]
+src = "smartContracts"
+test = "test/basic"
+out = "out/basic"
+cache_path = "cache/basic"
+libs = ["lib"]
+solc_version = "0.8.26"
+match_path = "test/basic/*"
+
+[profile.advanced]
+src = "eth-basic"
+test = "test/advanced"
+out = "out/advanced"
+cache_path = "cache/advanced"
+libs = ["lib"]
+solc_version = "0.8.26"
+match_path = "test/advanced/*"
