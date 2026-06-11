@@ -2,7 +2,7 @@
 pragma solidity ^0.8.26;
 
 import {Test as ForgeTest} from "forge-std/Test.sol";
-import "../../smartContracts/12.conversions.sol";
+import "../../basic/12.conversions.sol";
 
 contract Basic12ConversionsTest is ForgeTest {
     // bytes 拼接后转 string

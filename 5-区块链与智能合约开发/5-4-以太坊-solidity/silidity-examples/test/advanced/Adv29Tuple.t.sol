@@ -2,7 +2,7 @@
 pragma solidity ^0.8.26;
 
 import {Test as ForgeTest} from "forge-std/Test.sol";
-import "../../eth-basic/29.tuple.sol";
+import "../../advanced/29.tuple.sol";
 
 contract Adv29TupleTest is ForgeTest {
     // 元组赋值更新 struct 字段

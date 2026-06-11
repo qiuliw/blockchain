@@ -2,7 +2,7 @@
 pragma solidity ^0.8.26;
 
 import {Test as ForgeTest} from "forge-std/Test.sol";
-import "../../smartContracts/07.fixedBytes.sol";
+import "../../basic/07.fixedBytes.sol";
 
 contract Basic07FixedBytesTest is ForgeTest {
     // bytes1[5] 索引 0 取字符 h

@@ -2,7 +2,7 @@
 pragma solidity ^0.8.26;
 
 import {Test as ForgeTest} from "forge-std/Test.sol";
-import "../../smartContracts/06.addressTransfer.sol";
+import "../../basic/06.addressTransfer.sol";
 
 contract Basic06AddressTransferTest is ForgeTest {
     // 新部署合约余额为 0

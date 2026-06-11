@@ -2,7 +2,7 @@
 pragma solidity ^0.8.26;
 
 import {Test as ForgeTest} from "forge-std/Test.sol";
-import "../../eth-basic/27.contractCreation.sol";
+import "../../advanced/27.contractCreation.sol";
 
 contract Adv27ContractCreationTest is ForgeTest {
     // C2 内 new 创建子合约

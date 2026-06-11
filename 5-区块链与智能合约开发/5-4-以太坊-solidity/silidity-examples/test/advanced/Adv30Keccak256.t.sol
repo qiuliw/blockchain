@@ -2,7 +2,7 @@
 pragma solidity ^0.8.26;
 
 import {Test as ForgeTest} from "forge-std/Test.sol";
-import "../../eth-basic/30.keccak256.sol";
+import "../../advanced/30.keccak256.sol";
 
 contract Adv30Keccak256Test is ForgeTest {
     // keccak256 哈希结果非零

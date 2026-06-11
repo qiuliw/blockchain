@@ -2,7 +2,7 @@
 pragma solidity ^0.8.26;
 
 import {Test as ForgeTest} from "forge-std/Test.sol";
-import "../../smartContracts/03.viewConstantPure.sol";
+import "../../basic/03.viewConstantPure.sol";
 
 contract Basic03ViewConstantPureTest is ForgeTest {
     // view 读状态变量 ui+i10

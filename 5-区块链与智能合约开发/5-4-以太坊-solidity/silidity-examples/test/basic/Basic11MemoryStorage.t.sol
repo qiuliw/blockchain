@@ -2,7 +2,7 @@
 pragma solidity ^0.8.26;
 
 import {Test as ForgeTest} from "forge-std/Test.sol";
-import "../../smartContracts/11.memoryVsStorage.sol";
+import "../../basic/11.memoryVsStorage.sol";
 
 contract Basic11MemoryStorageTest is ForgeTest {
     // storage 引用修改 name 和 num

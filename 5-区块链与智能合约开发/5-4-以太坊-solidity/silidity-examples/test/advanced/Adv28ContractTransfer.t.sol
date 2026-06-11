@@ -2,7 +2,7 @@
 pragma solidity ^0.8.26;
 
 import {Test as ForgeTest} from "forge-std/Test.sol";
-import "../../eth-basic/28.contractTransfer.sol";
+import "../../advanced/28.contractTransfer.sol";
 
 contract Adv28ContractTransferTest is ForgeTest {
     // 跨合约调用返回值 42

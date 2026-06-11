@@ -1,5 +1,5 @@
 [profile.default]
-src = "smartContracts"
+src = "basic"
 test = "test/basic"
 out = "out/basic"
 cache_path = "cache/basic"
@@ -8,7 +8,7 @@ solc_version = "0.8.26"
 match_path = "test/basic/*"
 
 [profile.advanced]
-src = "eth-basic"
+src = "advanced"
 test = "test/advanced"
 out = "out/advanced"
 cache_path = "cache/advanced"

@@ -2,7 +2,7 @@
 pragma solidity ^0.8.26;
 
 import {Test as ForgeTest} from "forge-std/Test.sol";
-import "../../smartContracts/04.payable.sol";
+import "../../basic/04.payable.sol";
 
 contract Basic04PayableTest is ForgeTest {
     // payable 函数可接收 1 ether

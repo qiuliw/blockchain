@@ -2,7 +2,7 @@
 pragma solidity ^0.8.26;
 
 import {Test as ForgeTest} from "forge-std/Test.sol";
-import "../../eth-basic/24.timeUnit.sol";
+import "../../advanced/24.timeUnit.sol";
 
 contract Adv24TimeUnitTest is ForgeTest {
     // minutes 时间单位换算

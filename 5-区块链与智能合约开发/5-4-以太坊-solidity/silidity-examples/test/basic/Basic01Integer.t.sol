@@ -2,7 +2,7 @@
 pragma solidity ^0.8.26;
 
 import {Test as ForgeTest} from "forge-std/Test.sol";
-import "../../smartContracts/01.integer.sol";
+import "../../basic/01.integer.sol";
 
 contract Basic01IntegerTest is ForgeTest {
     // 整数类型转换后相加，期望 90

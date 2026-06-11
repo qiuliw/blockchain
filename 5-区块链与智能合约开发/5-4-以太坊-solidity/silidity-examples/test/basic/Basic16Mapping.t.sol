@@ -2,7 +2,7 @@
 pragma solidity ^0.8.26;
 
 import {Test as ForgeTest} from "forge-std/Test.sol";
-import "../../smartContracts/16-mapping.sol";
+import "../../basic/16-mapping.sol";
 
 contract Basic16MappingTest is ForgeTest {
     // mapping 按 id 读取

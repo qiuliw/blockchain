@@ -2,7 +2,7 @@
 pragma solidity ^0.8.26;
 
 import {Test as ForgeTest} from "forge-std/Test.sol";
-import "../../eth-basic/32.delete.sol";
+import "../../advanced/32.delete.sol";
 
 contract Adv32DeleteTest is ForgeTest {
     // delete 清空 string 长度归零

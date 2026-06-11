@@ -2,7 +2,7 @@
 pragma solidity ^0.8.26;
 
 import {Test as ForgeTest} from "forge-std/Test.sol";
-import "../../smartContracts/10.string.sol";
+import "../../basic/10.string.sol";
 
 contract Basic10StringTest is ForgeTest {
     // string 初始值 lily，长度 4

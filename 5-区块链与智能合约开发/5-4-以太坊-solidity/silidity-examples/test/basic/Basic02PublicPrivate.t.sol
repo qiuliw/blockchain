@@ -2,7 +2,7 @@
 pragma solidity ^0.8.26;
 
 import {Test as ForgeTest} from "forge-std/Test.sol";
-import "../../smartContracts/02.publicPrivate.sol";
+import "../../basic/02.publicPrivate.sol";
 
 contract Basic02PublicPrivateTest is ForgeTest {
     // public 函数外部可调用，100+10=110

@@ -2,7 +2,7 @@
 pragma solidity ^0.8.26;
 
 import {Test as ForgeTest} from "forge-std/Test.sol";
-import "../../eth-basic/31.inheritance.sol";
+import "../../advanced/31.inheritance.sol";
 
 contract Adv31InheritanceTest is ForgeTest {
     // 单继承 override，mydata=1

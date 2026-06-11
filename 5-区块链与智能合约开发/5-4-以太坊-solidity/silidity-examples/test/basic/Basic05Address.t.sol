@@ -2,7 +2,7 @@
 pragma solidity ^0.8.26;
 
 import {Test as ForgeTest} from "forge-std/Test.sol";
-import "../../smartContracts/05.address.sol";
+import "../../basic/05.address.sol";
 
 contract Basic05AddressTest is ForgeTest {
     // address 转 uint160 后 +10

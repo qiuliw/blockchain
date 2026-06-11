@@ -2,7 +2,7 @@
 pragma solidity ^0.8.26;
 
 import {Test as ForgeTest} from "forge-std/Test.sol";
-import "../../eth-basic/22.modifier.sol";
+import "../../advanced/22.modifier.sol";
 
 contract Adv22ModifierTest is ForgeTest {
     // onlyOwner modifier 放行修改

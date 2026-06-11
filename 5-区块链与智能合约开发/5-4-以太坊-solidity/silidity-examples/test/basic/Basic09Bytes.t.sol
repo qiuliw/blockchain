@@ -2,7 +2,7 @@
 pragma solidity ^0.8.26;
 
 import {Test as ForgeTest} from "forge-std/Test.sol";
-import "../../smartContracts/09.bytes.sol";
+import "../../basic/09.bytes.sol";
 
 contract Basic09BytesTest is ForgeTest {
     // bytes 赋值后 push 扩容

@@ -2,7 +2,7 @@
 pragma solidity ^0.8.26;
 
 import {Test as ForgeTest} from "forge-std/Test.sol";
-import "../../eth-basic/25.event.sol";
+import "../../advanced/25.event.sol";
 
 contract Adv25EventTest is ForgeTest {
     // payable 收款 + event 记录映射

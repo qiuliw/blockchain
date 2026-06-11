@@ -2,7 +2,7 @@
 pragma solidity ^0.8.26;
 
 import {Test as ForgeTest} from "forge-std/Test.sol";
-import "../../eth-basic/26.accessors.sol";
+import "../../advanced/26.accessors.sol";
 
 contract Adv26AccessorsTest is ForgeTest {
     // public 变量自动生成 getter

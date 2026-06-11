@@ -2,7 +2,7 @@
 pragma solidity ^0.8.26;
 
 import {Test as ForgeTest} from "forge-std/Test.sol";
-import "../../eth-basic/33.HTCoinERC20.sol";
+import "../../advanced/33.HTCoinERC20.sol";
 
 contract Adv33HTCoinTest is ForgeTest {
     uint256 constant INITIAL_SUPPLY = 1_000_000;

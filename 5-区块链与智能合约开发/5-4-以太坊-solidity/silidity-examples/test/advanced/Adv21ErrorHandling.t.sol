@@ -2,7 +2,7 @@
 pragma solidity ^0.8.26;
 
 import {Test as ForgeTest} from "forge-std/Test.sol";
-import "../../eth-basic/21.errorHandling.sol";
+import "../../advanced/21.errorHandling.sol";
 
 contract Adv21ErrorHandlingTest is ForgeTest {
     // owner 调用 setValue 成功

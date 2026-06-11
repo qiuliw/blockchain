@@ -2,7 +2,7 @@
 pragma solidity ^0.8.26;
 
 import {Test as ForgeTest} from "forge-std/Test.sol";
-import "../../smartContracts/15.struct.sol";
+import "../../basic/15.struct.sol";
 
 contract Basic15StructTest is ForgeTest {
     // struct 多返回值解构

@@ -2,7 +2,7 @@
 pragma solidity ^0.8.26;
 
 import {Test as ForgeTest} from "forge-std/Test.sol";
-import "../../smartContracts/08.enum.sol";
+import "../../basic/08.enum.sol";
 
 contract Basic08EnumTest is ForgeTest {
     // 枚举 Day 默认值为 6
