@@ -1,4 +1,4 @@
-// 测试命令: forge test --match-path "test/basic/16-mapping.t.sol" -vv
+// 测试命令: 无对应 Foundry 测试（课件演示，可用 FOUNDRY_PROFILE=advanced forge build 编译检查）
 pragma solidity ^0.8.26;
 
 
@@ -29,9 +29,7 @@ contract Test {
         return name;
     }
     
-    function setNameById(uint id)  public returns (string memory){
-        // mapping(uint => string) memory id_name = id_names;
-        // var ids = id_names;
+    function setNameById(uint id) public {
         id_names[id] = "Hello";
     }
     

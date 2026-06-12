@@ -1,4 +1,4 @@
-// 测试命令: forge test --match-path "test/basic/12.byteBytesString转换.t.sol" -vv
+// 测试命令: forge test --match-path "test/basic/12.conversions.t.sol" -vv
 pragma solidity ^0.8.26;
 
 import {Test as ForgeTest} from "forge-std/Test.sol";

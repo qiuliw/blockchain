@@ -37,7 +37,7 @@ FOUNDRY_PROFILE=advanced forge test
 
 # 跑单个文件
 forge test --match-path "test/basic/01.integer.t.sol" -vv
-forge test --match-path "test/basic/02.publicPrivate测试.t.sol" -vv
+forge test --match-path "test/basic/02.publicPrivate.t.sol" -vv
 
 # 只看某个测试
 forge test --match-test testAdd -vvv
@@ -55,13 +55,13 @@ FOUNDRY_PROFILE=advanced forge build   # advanced/
 | 示例文件 | 测试文件 |
 |----------|----------|
 | `basic/01.integer.sol` | `test/basic/01.integer.t.sol` |
-| `basic/02.publicPrivate测试.sol` | `test/basic/02.publicPrivate测试.t.sol` |
+| `basic/02.publicPrivate.sol` | `test/basic/02.publicPrivate.t.sol` |
 | `basic/16-mapping.sol` | `test/basic/16-mapping.t.sol` |
-| `advanced/22.修饰器modifier.sol` | `test/advanced/22.修饰器modifier.t.sol` |
+| `advanced/22.modifier.sol` | `test/advanced/22.modifier.t.sol` |
 | `advanced/33.HTCoinERC20.sol` | `test/advanced/33.HTCoinERC20.t.sol` |
-| … | 其余文件同理（源文件名 + `.t.sol`） |
+| … | 源文件与测试文件同名，仅后缀 `.t.sol` 不同 |
 
-含中文文件名的示例提供了 **ASCII 符号链接**（如 `02.publicPrivate.sol`），供测试 `import` 使用；测试文件与中文源文件同名。
+源文件、测试文件均使用 **英文文件名**，一一对应，无符号链接。
 
 ## IDE 语法检查
 
@@ -76,5 +76,5 @@ FOUNDRY_PROFILE=advanced forge build   # advanced/
 ## 说明
 
 - 合约与测试均使用 **Solidity ^0.8.26**
-- `advanced/17.不要使用var.sol`、`20.全局变量.sol` 等仅作语法演示，无对应测试
+- `advanced/17.noVar.sol`、`20.globalVariables.sol` 等仅作语法演示，无对应测试
 - 测试在本地 EVM 中验证函数返回值与状态变化

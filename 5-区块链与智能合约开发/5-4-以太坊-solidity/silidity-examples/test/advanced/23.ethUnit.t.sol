@@ -1,4 +1,4 @@
-// 测试命令: FOUNDRY_PROFILE=advanced forge test --match-path "test/advanced/23.货币单位.t.sol" -vv
+// 测试命令: FOUNDRY_PROFILE=advanced forge test --match-path "test/advanced/23.ethUnit.t.sol" -vv
 pragma solidity ^0.8.26;
 
 import {Test as ForgeTest} from "forge-std/Test.sol";

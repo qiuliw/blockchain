@@ -5,7 +5,7 @@ pragma solidity ^0.8.26;
 contract  Test {
     //状态变量
 
-    //类型不匹配时需要显示转换类型
+    //类型不匹配时需要显式转换类型
 
     //返回值需要使用returns描述
     
@@ -19,6 +19,7 @@ contract  Test {
     }
     
     function isEqueal() public view returns(bool) {
+        // 100 != uint256(-10)，返回 false
         return ui256 == uint256(int256(i10));
     }
 }

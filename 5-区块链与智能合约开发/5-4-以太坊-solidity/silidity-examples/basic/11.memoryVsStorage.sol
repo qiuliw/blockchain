@@ -24,13 +24,13 @@ contract  Test {
         setName2(name);
     }
     
-    //2. 如果想引用传递，那么需要明确指定为stroage类型
+    //2. 如果想引用传递，那么需要明确指定为storage类型
     function setName2(string storage input) private {
         num = 30;
         bytes(input)[0] = "L";
     }
     
-    //如果局部变量是string，数组，结构体类型数据，默认情况下是storage类型
+    //局部引用类型必须显式写 memory 或 storage，不能省略
     function localTest() public {
         //string tmp = name;
         string storage tmp = name;

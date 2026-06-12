@@ -9,9 +9,7 @@ contract  Test {
     address public addr1 = address(uint160(0x0014723a09acff6d2a60dcdf7aa4aff308fddc160c));
     
     
-    //1. 匿名函数：没有函数名，没有参数，没有返回值的函数，就是匿名函数
-    //2. 当调用一个不存在的方法时，合约会默认的去调用匿名函数
-    //3. 匿名函数一般用来给合约转账，因为费用低
+    // receive：接收纯 ETH 转账的特殊函数（无 calldata，gas 较低）
     receive() external payable {
         
     }

@@ -1,4 +1,4 @@
-// 测试命令: forge test --match-path "test/basic/02.publicPrivate测试.t.sol" -vv
+// 测试命令: forge test --match-path "test/basic/02.publicPrivate.t.sol" -vv
 pragma solidity ^0.8.26;
 
 import {Test as ForgeTest} from "forge-std/Test.sol";
@@ -11,9 +11,10 @@ contract Basic02PublicPrivateTest is ForgeTest {
         assertEq(t.Add(), 110);
     }
 
-    // private 变量外部不可见，比较为 false
+    // public isEqueal()：100 != 10，返回 false
     function testIsEqual() public {
         Test t = new Test();
         assert(!t.isEqueal());
     }
+    
 }

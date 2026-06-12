@@ -4,7 +4,7 @@ pragma solidity ^0.8.26;
 
 contract  Test {
     //状态变量
-    //类型不匹配时需要显示转换类型
+    //类型不匹配时需要显式转换类型
     //返回值需要使用returns描述
     
     
@@ -32,7 +32,7 @@ contract  Test {
         ui = num;
     }
     
-    // view 函数中不能修改状态变量，否则编译报错
+    // 若给此函数加上 view，因修改 ui 会编译报错
     function setValue1(uint256 num) public {
         ui = num;
     }

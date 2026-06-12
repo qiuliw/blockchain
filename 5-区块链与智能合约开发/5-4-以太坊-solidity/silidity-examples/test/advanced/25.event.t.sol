@@ -1,4 +1,4 @@
-// 测试命令: FOUNDRY_PROFILE=advanced forge test --match-path "test/advanced/25.事件event.t.sol" -vv
+// 测试命令: FOUNDRY_PROFILE=advanced forge test --match-path "test/advanced/25.event.t.sol" -vv
 pragma solidity ^0.8.26;
 
 import {Test as ForgeTest} from "forge-std/Test.sol";

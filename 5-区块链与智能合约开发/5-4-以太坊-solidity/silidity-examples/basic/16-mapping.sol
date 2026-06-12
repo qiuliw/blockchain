@@ -29,9 +29,7 @@ contract Test {
         return name;
     }
     
-    function setNameById(uint id)  public returns (string memory){
-        // mapping(uint => string) memory id_name = id_names;
-        // var ids = id_names;
+    function setNameById(uint id) public {
         id_names[id] = "Hello";
     }
     
