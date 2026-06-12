@@ -4,10 +4,10 @@ pragma solidity ^0.8.26;
 import {Test as ForgeTest} from "forge-std/Test.sol";
 import "../../basic/10.string.sol";
 
-contract Basic10StringTest is ForgeTest {
+contract StringTest is ForgeTest {
     // string 初始值 lily，长度 4
     function testInitialName() public {
-        Test t = new Test();
+        String t = new String();
         assert(keccak256(bytes(t.name())) == keccak256("lily"));
         assertEq(t.getLength(), 4);
     }

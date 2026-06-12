@@ -2,7 +2,7 @@
 pragma solidity ^0.8.26;
 
 
-contract Test {
+contract GlobalVariables {
     
     bytes32 public blockhash1;
     address public coinbase;

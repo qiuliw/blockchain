@@ -2,7 +2,7 @@
 pragma solidity ^0.8.26;
 
 
-contract  Test {
+contract DynamicArray {
     
     //第一种创建方式，直接赋值
     uint8[] numbers = [1,2,3,4,5,6,7,8,9,10];

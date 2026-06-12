@@ -4,10 +4,10 @@ pragma solidity ^0.8.26;
 import {Test as ForgeTest} from "forge-std/Test.sol";
 import "../../basic/08.enum.sol";
 
-contract Basic08EnumTest is ForgeTest {
+contract EnumTest is ForgeTest {
     // WeekDays.Sunday 枚举值为 6
     function testDefaultDay() public {
-        Test t = new Test();
+        Enum t = new Enum();
         assertEq(t.getDefaultDay(), 6);
     }
 }

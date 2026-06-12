@@ -2,7 +2,7 @@
 pragma solidity ^0.8.26;
 
 
-contract  Test {
+contract MsgSender {
 
     address public owner;
     uint256 a;

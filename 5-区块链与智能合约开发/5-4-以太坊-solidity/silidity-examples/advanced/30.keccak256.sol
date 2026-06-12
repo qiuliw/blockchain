@@ -2,7 +2,7 @@
 pragma solidity ^0.8.26;
 
 
-contract Test {
+contract Keccak256 {
     
     function test() public pure returns(bytes32){
         bytes memory v1 = abi.encodePacked("hello", "b", uint256(1), "hello");

@@ -2,7 +2,7 @@
 pragma solidity ^0.8.26;
 
 
-contract  Test {
+contract Address {
 
 
     address public addr1 = address(uint160(0x0014723a09acff6d2a60dcdf7aa4aff308fddc160c));

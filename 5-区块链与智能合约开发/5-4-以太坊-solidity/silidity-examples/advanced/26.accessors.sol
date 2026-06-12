@@ -2,7 +2,7 @@
 pragma solidity ^0.8.26;
 
 
-contract  Test {
+contract Accessors {
     
     // 加了public 的状态变量，solidity会自动的生成一个同名的访问函数。
     // 在合约内部使用这个状态变量的时候，直接当初变量使用即可
@@ -21,10 +21,10 @@ contract  Test {
     }
 }
 
-contract Test1 {
+contract Accessors1 {
     
     function getValue() public returns(uint256) {
-        Test t1 = new Test();
+        Accessors t1 = new Accessors();
         return t1.data();
     }
 }

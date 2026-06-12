@@ -2,7 +2,7 @@
 pragma solidity ^0.8.26;
 
 
-contract  Test {
+contract Integer {
     //状态变量
 
     //类型不匹配时需要显式转换类型

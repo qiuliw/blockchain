@@ -2,7 +2,7 @@
 pragma solidity ^0.8.26;
 
 
-contract  Test {
+contract PublicPrivate {
     //状态变量
     //类型不匹配时需要显式转换类型
     //返回值需要使用returns描述

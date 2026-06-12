@@ -1,7 +1,7 @@
 // 测试命令: FOUNDRY_PROFILE=advanced forge test --match-path "test/advanced/29.tuple.t.sol" -vv
 pragma solidity ^0.8.26;
 
-contract Test {
+contract Tuple {
     
     struct Student {
         string name;

@@ -2,7 +2,7 @@
 pragma solidity ^0.8.26;
 //pragma experimental ABIEncoderV2;
 
-contract Test {
+contract Struct {
     //定义结构之后无分号，与枚举一致
     struct Student {
         string name;

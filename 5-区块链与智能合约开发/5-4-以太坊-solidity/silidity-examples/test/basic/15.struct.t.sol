@@ -4,10 +4,10 @@ pragma solidity ^0.8.26;
 import {Test as ForgeTest} from "forge-std/Test.sol";
 import "../../basic/15.struct.sol";
 
-contract Basic15StructTest is ForgeTest {
+contract StructTest is ForgeTest {
     // tuple 多返回值解构（name/age/score）
     function testReturnStudent() public {
-        Test t = new Test();
+        Struct t = new Struct();
         string memory n;
         uint age;
         uint score;

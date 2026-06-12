@@ -2,7 +2,7 @@
 pragma solidity ^0.8.26;
 
 
-contract  Test {
+contract MemoryVsStorage {
     string public name = "lily";
     uint256 public num = 10;
     

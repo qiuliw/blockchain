@@ -2,7 +2,7 @@
 pragma solidity ^0.8.26;
 
 
-contract Test {
+contract Mapping {
     //id -> name
     mapping(uint => string) public id_names;
     
@@ -12,7 +12,7 @@ contract Test {
     //1. 对象在创建的时候，自动执行的函数，完成对象的初始化工作
     //2. 构造函数仅执行一次
     
-    // function Test() public {
+    // function Mapping() public {
         
     // }
 

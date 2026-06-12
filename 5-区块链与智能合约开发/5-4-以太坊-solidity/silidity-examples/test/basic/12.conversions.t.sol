@@ -4,10 +4,10 @@ pragma solidity ^0.8.26;
 import {Test as ForgeTest} from "forge-std/Test.sol";
 import "../../basic/12.conversions.sol";
 
-contract Basic12ConversionsTest is ForgeTest {
+contract ConversionsTest is ForgeTest {
     // bytes 拼接后转 string
     function testBytesToString() public {
-        Test t = new Test();
+        Conversions t = new Conversions();
         t.bytesToString();
         assert(keccak256(bytes(t.str1())) == keccak256("helloworld"));
     }

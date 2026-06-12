@@ -2,7 +2,7 @@
 pragma solidity ^0.8.26;
 
 
-contract  Test {
+contract Delete {
     
     //01. string 
     string public str1 = "hello";

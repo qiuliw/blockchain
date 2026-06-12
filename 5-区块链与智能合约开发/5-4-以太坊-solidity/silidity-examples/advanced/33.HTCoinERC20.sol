@@ -45,7 +45,7 @@ contract SafeMath {
 }
 
 
-contract HangTouCoin is SafeMath{
+contract HTCoinERC20 is SafeMath{
     
     string public name;
     string public symbol;
@@ -77,7 +77,7 @@ contract HangTouCoin is SafeMath{
 
     /* Initializes contract with initial supply tokens to the creator of the contract */
     
-    //1000000, "HangTouCoin", "HTC"
+    //1000000, "HTCoinERC20", "HTC"
      constructor(
         uint256 _initialSupply, //发行数量 
         string memory _tokenName, //token的名字 HTCoin

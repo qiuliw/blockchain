@@ -2,7 +2,7 @@
 pragma solidity ^0.8.26;
 
 
-contract  Test {
+contract Modifier {
     
     uint256 public value ;
     address public owner;

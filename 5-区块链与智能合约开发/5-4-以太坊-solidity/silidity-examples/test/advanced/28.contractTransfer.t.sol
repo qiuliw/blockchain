@@ -4,7 +4,7 @@ pragma solidity ^0.8.26;
 import {Test as ForgeTest} from "forge-std/Test.sol";
 import "../../advanced/28.contractTransfer.sol";
 
-contract Adv28ContractTransferTest is ForgeTest {
+contract ContractTransferTest is ForgeTest {
     // 跨合约调用返回值 42
     function testInfoFeedReturns42() public {
         InfoFeed feed = new InfoFeed();

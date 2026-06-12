@@ -4,7 +4,7 @@ pragma solidity ^0.8.26;
 import {Test as ForgeTest} from "forge-std/Test.sol";
 import "../../advanced/31.inheritance.sol";
 
-contract Adv31InheritanceTest is ForgeTest {
+contract InheritanceTest is ForgeTest {
     // 单继承 override，mydata=1
     function testSon3() public {
         son3 s = new son3();

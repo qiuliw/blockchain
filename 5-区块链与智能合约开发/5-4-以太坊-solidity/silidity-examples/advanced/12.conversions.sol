@@ -2,7 +2,7 @@
 pragma solidity ^0.8.26;
 
 
-contract  Test {
+contract Conversions {
     
     bytes10 public b10 = 0x68656c6c6f776f726c64; //helloworld
     

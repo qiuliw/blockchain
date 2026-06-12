@@ -4,10 +4,10 @@ pragma solidity ^0.8.26;
 import {Test as ForgeTest} from "forge-std/Test.sol";
 import "../../advanced/21.errorHandling.sol";
 
-contract Adv21ErrorHandlingTest is ForgeTest {
+contract ErrorHandlingTest is ForgeTest {
     // owner 调用 setValue 成功
     function testSetValueAsOwner() public {
-        Test t = new Test();
+        ErrorHandling t = new ErrorHandling();
         t.setValue(42);
         assertEq(t.a(), 42);
     }

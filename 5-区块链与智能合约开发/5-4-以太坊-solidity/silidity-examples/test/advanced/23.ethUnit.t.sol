@@ -4,7 +4,7 @@ pragma solidity ^0.8.26;
 import {Test as ForgeTest} from "forge-std/Test.sol";
 import "../../advanced/23.ethUnit.sol";
 
-contract Adv23EthUnitTest is ForgeTest {
+contract EthUnitTest is ForgeTest {
     // 1 ether == 10^18 wei
     function testEtherEqualsWei() public {
         EthUnit u = new EthUnit();

@@ -4,7 +4,7 @@ pragma solidity ^0.8.26;
 import {Test as ForgeTest} from "forge-std/Test.sol";
 import "../../advanced/27.contractCreation.sol";
 
-contract Adv27ContractCreationTest is ForgeTest {
+contract ContractCreationTest is ForgeTest {
     // C2 内 new 创建子合约
     function testCreateViaC2() public {
         C2 c = new C2();

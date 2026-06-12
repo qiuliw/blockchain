@@ -4,10 +4,10 @@ pragma solidity ^0.8.26;
 import {Test as ForgeTest} from "forge-std/Test.sol";
 import "../../advanced/33.HTCoinERC20.sol";
 
-contract Adv33HTCoinTest is ForgeTest {
+contract HTCoinERC20Test is ForgeTest {
     uint256 constant INITIAL_SUPPLY = 1_000_000;
 
-    HangTouCoin token;
+    HTCoinERC20 token;
     address owner;
     address bob;
     address alice;
@@ -18,12 +18,12 @@ contract Adv33HTCoinTest is ForgeTest {
         bob = makeAddr("bob");
         alice = makeAddr("alice");
         vm.prank(owner);
-        token = new HangTouCoin(INITIAL_SUPPLY, "HangTouCoin", "HTC");
+        token = new HTCoinERC20(INITIAL_SUPPLY, "HTCoinERC20", "HTC");
     }
 
     // 名称/符号/精度/总量/owner
     function testConstructor() public view {
-        assertEq(token.name(), "HangTouCoin");
+        assertEq(token.name(), "HTCoinERC20");
         assertEq(token.symbol(), "HTC");
         assertEq(token.decimals(), 18);
         assertEq(token.totalSupply(), INITIAL_SUPPLY * 10 ** 18);
