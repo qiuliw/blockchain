@@ -11,8 +11,7 @@
 | 5-4 | Solidity 示例 + Foundry 测试 | [README](./5-4-以太坊-solidity/silidity-examples/README.md) |
 | 5-5 | Node.js 示例 | [README](./5-5-以太坊-nodejs/README.md) |
 | 5-6 | web3.js 脚本 | [README](./5-6-以太坊-web3/README.md) |
-| 5-7 | 彩票 DApp | [README](./5-7-以太坊-彩票/README.md) |
-| 5-8 | 众筹合约 | [contracts/README](./5-8-以太坊-众筹/contracts/README.md) |
+| 5-7 | 彩票 DApp | [lottery-eth/README](./5-7-以太坊-彩票/lottery-eth/README.md) |
 | 5-8 | 众筹 DApp | [funding-eth/README](./5-8-以太坊-众筹/funding-eth/README.md) |
 | 5-9 | Truffle 入门 | [README](./5-9-以太坊-truffle/truffle-init/README.md) |
 | 5-10 | web3.js 框架 | [README](./5-10-web3.js框架/truffle-react-web3/README.md) |
@@ -32,8 +31,9 @@ chmod +x setup.sh && ./setup.sh
 |------|----------------|
 | Node.js 18+ | 5-5 ~ 5-11 |
 | Go 1.18+ | 5-2 |
-| Foundry | 5-3、5-4（`silidity-examples`） |
-| Ganache :7545 | 5-6 ~ 5-11 |
+| Foundry | 5-3、5-4、5-6、5-7、5-8、5-11（`ebay-eth`） |
+| Anvil :8545 | 5-3 ~ 5-8、5-11 `ebay-eth` Foundry 项目 |
+| Ganache :7545 | 5-9 Truffle、5-10、5-11 |
 | MetaMask | 5-7 ~ 5-11 前端 |
 | IPFS :5001 | 5-11 |
 

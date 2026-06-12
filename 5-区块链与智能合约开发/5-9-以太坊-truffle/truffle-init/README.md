@@ -1,6 +1,6 @@
 # 5-9 以太坊 Truffle
 
-Truffle 5 + Solidity 0.4.25 入门项目（SimpleStorage）。
+Truffle 5 + Solidity **0.8.26** 入门项目（SimpleStorage）。
 
 ## 环境
 
@@ -24,7 +24,6 @@ npm run test        # 运行测试
 
 ## 合约
 
-- `contracts/Migrations.sol` — 迁移记录
 - `contracts/SimpleStorage.sol` — 存取整数示例
 
 ## WSL 提示

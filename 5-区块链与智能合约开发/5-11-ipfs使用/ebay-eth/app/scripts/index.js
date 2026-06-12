@@ -1,7 +1,8 @@
 import '../styles/app.css'
 import {default as Web3} from 'web3'
 import {default as contract} from 'truffle-contract'
-import EcommerceStoreArtifact from '../../build/contracts/EcommerceStore.json'
+import EcommerceStoreArtifact from '../../abi/EcommerceStore.json'
+import storeConfig from '../contracts-config'
 
 import $ from 'jquery'
 
@@ -15,7 +16,11 @@ const App = {
 
         ecommerceStoreContract.setProvider(window.web3.currentProvider)
 
-        ecommerceStoreInstance = await ecommerceStoreContract.deployed()
+        if (!storeConfig.contractAddress) {
+            throw new Error('请先在 app/contracts-config.js 设置合约地址')
+        }
+
+        ecommerceStoreInstance = await ecommerceStoreContract.at(storeConfig.contractAddress)
 
         // let accounts = await web3.eth.getAccounts()
         //
@@ -42,7 +47,12 @@ function renderProducts() {
         for (let i = 1; i <= productIndex; i++) {
             // 2. 获取每个产品的信息
             ecommerceStoreInstance.getProductById(i).then(productInfo => {
-                let {0: id, 1: name, 2: category, 3: imageLink, 4: descLink, 5: auctionStartTime, 6: auctionEndTime, 7: startPrice, 8: status} = productInfo
+                let id = productInfo.id || productInfo[0]
+                let name = productInfo.name || productInfo[1]
+                let category = productInfo.category || productInfo[2]
+                let imageLink = productInfo.imageLink || productInfo[3]
+                let auctionStartTime = productInfo.auctionStartTime || productInfo[5]
+                let auctionEndTime = productInfo.auctionEndTime || productInfo[6]
                 // 3. 每个产品创建一个node，填充数据，
                 // console.table(productInfo)
                 let node = $('<div/>')
@@ -65,7 +75,7 @@ function renderProducts() {
                 // let price = window.utils.web3.fromWei(startPrice, 'ether')
                 // node.append(`<div>${price}</div>`)
                 // 按钮detail
-                node.append(`<a href="product.html?id=${id.c[0]}">Details</a>`)
+                node.append(`<a href="product.html?id=${id.c ? id.c[0] : id}">Details</a>`)
 
                 // 4.组合append到id="product-list中
                 $('#product-list').append(node)
@@ -82,7 +92,7 @@ window.addEventListener('load', function () {
         window.web3 = new Web3(web3.currentProvider)
     } else {
         console.warn('local web3 found!')
-        window.web3 = new Web3(new Web3.providers.HttpProvider('http://127.0.0.1:9545'))
+        window.web3 = new Web3(new Web3.providers.HttpProvider('http://127.0.0.1:8545'))
     }
 
     App.start()

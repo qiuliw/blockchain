@@ -5,7 +5,7 @@
   "scripts": {
     "compile": "node node_modules/truffle/build/cli.bundled.js compile",
     "test": "node node_modules/truffle/build/cli.bundled.js test",
-    "migrate": "node node_modules/truffle/build/cli.bundled.js migrate --network development"
+    "migrate": "node node_modules/truffle/build/cli.bundled.js migrate --network ganacheNet"
   },
   "devDependencies": {
     "truffle": "5.11.5"

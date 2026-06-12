@@ -4,7 +4,9 @@
   "private": true,
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build"
+    "build": "react-scripts build",
+    "test:contract": "forge test",
+    "deploy:local": "forge script script/DeployFundingFactory.s.sol:DeployFundingFactory --rpc-url http://127.0.0.1:8545 --broadcast"
   },
   "dependencies": {
     "react": "^18.2.0",
@@ -12,7 +14,6 @@
     "react-scripts": "5.0.1",
     "semantic-ui-css": "^2.5.0",
     "semantic-ui-react": "^2.1.5",
-    "solc": "0.4.25",
     "web3": "1.10.4"
   },
   "browserslist": {

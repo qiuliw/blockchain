@@ -1,41 +1,32 @@
-# 5-6 以太坊 web3.js
+# web3-project
 
-使用 web3.js + solc 编译、部署、交互 `SimpleStorage` 合约。
+Foundry 合约 + web3.js 链上交互示例（`SimpleStorage`）。
 
-项目代码在 [`web3-project/`](./web3-project/)。
-
-## 环境
-
-- Node.js 18+
-- Ganache（本地链，端口 **7545**）
-
-## 安装
+## 快速开始
 
 ```bash
-cd web3-project
-npm install --ignore-scripts
-```
+forge install
+forge test
+npm run build:contract
 
-## 运行
+anvil
+npm run deploy:local
+# 将地址写入 config.js
 
-```bash
-# 1. 编译（无需链）
-npm run compile
-
-# 2. 启动 Ganache，修改 02-deploy.js 中的 account
-
-# 3. 部署，记下合约 address
-npm run deploy
-
-# 4. 把 address 填入 03-instance.js
 npm run interact
 ```
+
+## 配置
+
+- `config.js` — RPC、合约地址、默认账户
+- `abi/SimpleStorage.json` — 由 `npm run build:contract` 生成
 
 ## 脚本
 
 | 文件 | 作用 |
 |------|------|
-| `01-compile.js` | solc 编译 |
-| `02-deploy.js` | 部署合约 |
-| `03-instance.js` | 获取实例 |
-| `04-interaction.js` | 读写数据 |
+| `scripts/sync-abi.js` | 同步 Foundry 编译 ABI |
+| `03-instance.js` | 创建 web3 合约实例 |
+| `04-interaction.js` | 读写演示 |
+
+上级目录说明见 [../README.md](../README.md)。

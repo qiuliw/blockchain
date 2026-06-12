@@ -5,7 +5,7 @@
 > ```bash
 > cd HelloFoundry
 > forge test          # 运行 Counter 合约测试
-> forge build         # 编译
+> forge build         # 编译（Solidity 0.8.26）
 > forge script script/Counter.s.sol --rpc-url http://127.0.0.1:8545 --broadcast  # 部署（需本地链）
 > ```
 >

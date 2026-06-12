@@ -3,13 +3,13 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "compile": "node 01-compile.js",
-    "deploy": "node 02-deploy.js",
+    "test:contract": "forge test",
+    "build:contract": "forge build && node scripts/sync-abi.js",
+    "deploy:local": "forge script script/DeploySimpleStorage.s.sol:DeploySimpleStorage --rpc-url http://127.0.0.1:8545 --broadcast",
     "instance": "node 03-instance.js",
     "interact": "node 04-interaction.js"
   },
   "dependencies": {
-    "solc": "0.4.25",
     "web3": "1.10.4"
   }
 }
