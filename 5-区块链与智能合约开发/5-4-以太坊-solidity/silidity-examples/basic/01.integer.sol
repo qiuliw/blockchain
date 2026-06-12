@@ -3,17 +3,14 @@ pragma solidity ^0.8.26;
 
 
 contract Integer {
-    //状态变量
-
-    //类型不匹配时需要显式转换类型
-
-    //返回值需要使用returns描述
     
-    uint256 ui256 = 100;
+    uint256 ui256 = 100; //状态变量
     
     int8 i10 = -10;
     
+    //返回值需要使用returns描述
     function add() public view returns(uint256) {
+        //类型不匹配时需要显式转换类型
         // 先转有符号运算，再转回 uint256
         return uint256(int256(ui256) + int256(i10));
     }

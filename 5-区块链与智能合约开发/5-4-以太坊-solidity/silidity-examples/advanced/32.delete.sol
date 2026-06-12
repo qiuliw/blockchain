@@ -1,7 +1,7 @@
 // 测试命令: FOUNDRY_PROFILE=advanced forge test --match-path "test/advanced/32.delete.t.sol" -vv
 pragma solidity ^0.8.26;
 
-
+// delete 删除状态属性元素内容，内容被重置为默认值
 contract Delete {
     
     //01. string 

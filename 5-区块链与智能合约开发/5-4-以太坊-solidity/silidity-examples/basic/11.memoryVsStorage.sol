@@ -6,12 +6,9 @@ contract MemoryVsStorage {
     string public name = "lily";
     uint256 public num = 10;
     
-    
-    
     function call1() public {
         setName(name);    
     }
-    
     
     //对于引用类型数据，作为函数参数时，默认是memory类型（值传递）
     //function setName(string memory input) private {

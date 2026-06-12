@@ -2,6 +2,7 @@
 pragma solidity ^0.8.26;
 
 
+// 合约类型与地址的转换
 contract  C1 {
     
     uint256 public value ;

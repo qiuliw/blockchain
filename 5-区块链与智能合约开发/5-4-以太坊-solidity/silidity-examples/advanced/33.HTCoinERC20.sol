@@ -8,6 +8,7 @@ contract SafeMath {
   //internal > private 
     //internal < public
     //修饰的函数只能在合约的内部或者子合约中使用
+    // protect 血缘使用
     //乘法
   function safeMul(uint256 a, uint256 b) internal pure returns (uint256) {
     uint256 c = a * b;

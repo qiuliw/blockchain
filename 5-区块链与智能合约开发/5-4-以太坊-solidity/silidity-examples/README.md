@@ -5,7 +5,7 @@ Solidity **0.8.26** 语法示例 + **Foundry / forge-std** 单元测试。
 | 目录 | 内容 |
 |------|------|
 | `basic/` | 基础语法（16 个示例） |
-| `advanced/` | 进阶语法（继承、事件、modifier 等） |
+| `advanced/` | 进阶语法（17 起，继承、事件、modifier 等；不含 basic 重复内容） |
 | `test/basic/` | 基础示例 Foundry 测试 |
 | `test/advanced/` | 进阶示例 Foundry 测试 |
 | `lib/forge-std/` | Foundry 标准库（`forge install` 安装） |
@@ -29,10 +29,10 @@ forge install   # 若 lib/forge-std 缺失
 ```bash
 cd 5-4-以太坊-solidity/silidity-examples
 
-# 基础示例（20 个测试）
+# 基础示例（16 个测试文件，22 个测试用例）
 forge test
 
-# 进阶示例（22 个测试）
+# 进阶示例（13 个测试文件，22 个测试用例）
 FOUNDRY_PROFILE=advanced forge test
 
 # 跑单个文件
@@ -76,5 +76,6 @@ FOUNDRY_PROFILE=advanced forge build   # advanced/
 ## 说明
 
 - 合约与测试均使用 **Solidity ^0.8.26**
+- `advanced/` 从 **17** 起编号，与 `basic/`（00–16）衔接；已移除与 basic 重复的 01–16 示例
 - `advanced/17.noVar.sol`、`20.globalVariables.sol` 等仅作语法演示，无对应测试
 - 测试在本地 EVM 中验证函数返回值与状态变化

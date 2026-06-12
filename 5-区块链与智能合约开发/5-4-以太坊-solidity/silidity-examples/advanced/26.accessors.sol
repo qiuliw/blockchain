@@ -2,6 +2,7 @@
 pragma solidity ^0.8.26;
 
 
+// 默认 Get 函数，data()
 contract Accessors {
     
     // 加了public 的状态变量，solidity会自动的生成一个同名的访问函数。

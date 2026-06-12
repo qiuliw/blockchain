@@ -11,9 +11,7 @@ contract Event {
     // 1. 定义一个事件，使用圆括号，后面加上分号
     // 2. 需要使用emit关键字
     // 3. 在web3调用时可以监听到事件
-    event playEvent(address, uint256, uint256);
-    
-    
+    event playEvent(address, uint256, uint256); // 往区块链的 transaction receipt logs（交易收据日志）里写一条记录，不上链，不是C#的事件
     
     function paly() public payable {
 

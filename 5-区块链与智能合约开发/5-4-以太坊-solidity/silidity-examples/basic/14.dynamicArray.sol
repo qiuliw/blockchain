@@ -15,7 +15,6 @@ contract DynamicArray {
         return numbers;
     }
     
-    
     //使用new关键字进行创建，赋值给storage变量数组
     uint8[] numbers2;
     

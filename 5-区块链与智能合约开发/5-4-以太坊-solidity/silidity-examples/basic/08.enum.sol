@@ -1,6 +1,7 @@
 // 测试命令: forge test --match-path "test/basic/08.enum.t.sol" -vv
 pragma solidity ^0.8.26;
 
+
 contract Enum {
    
     enum WeekDays {

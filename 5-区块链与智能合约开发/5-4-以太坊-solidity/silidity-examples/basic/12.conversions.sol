@@ -16,9 +16,6 @@ contract Conversions {
         }
     }
     
-    
-    
-    
     //将bytes转成string
     string public str1;
     
@@ -26,8 +23,6 @@ contract Conversions {
         fixedByteToBytes();
         str1 = string(bs10);
     }
-    
-    
     
     //将string转成bytes
     bytes public bs20;

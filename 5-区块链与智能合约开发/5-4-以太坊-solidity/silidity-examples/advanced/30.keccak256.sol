@@ -1,15 +1,13 @@
 // 测试命令: FOUNDRY_PROFILE=advanced forge test --match-path "test/advanced/30.keccak256.t.sol" -vv
 pragma solidity ^0.8.26;
 
-
+// 把任意数据变成一个 32字节不可逆哈希值（指纹）
 contract Keccak256 {
     
     function test() public pure returns(bytes32){
         bytes memory v1 = abi.encodePacked("hello", "b", uint256(1), "hello");
         return keccak256(v1);
     }
-    
-    
     
     function test1() public pure returns(bytes32) {
         //bytes32 hash = sha3("hello", 1, "world", 2);

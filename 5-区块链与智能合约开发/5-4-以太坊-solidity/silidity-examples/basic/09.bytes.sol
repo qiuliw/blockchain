@@ -6,7 +6,6 @@ contract Bytes {
 
     bytes public name;
     
-    
     function getLen() public view returns(uint256) {
         return name.length;
     }
@@ -30,7 +29,6 @@ contract Bytes {
             name.pop();
         }
     }
-    
     
     //4.可以通过下标进行数据修改
     function setValue2(uint256 i) public {

@@ -11,12 +11,11 @@ contract Struct {
         string sex;
     }
 
-    Student[] public Students;
-    
+    Student[] public Students; // 状态属性长度可变
         
     //两种赋值方式
-    Student public stu1 = Student("lily", 18, 90, "girl");
-    Student public stu2 = Student({name:"Jim", age:20, score:80, sex:"boy"});
+    Student public stu1 = Student("lily", 18, 90, "girl"); // 按顺序
+    Student public stu2 = Student({name:"Jim", age:20, score:80, sex:"boy"}); // 不按照顺序，但注明赋值属性
     
     function assign() public {
         Students.push(stu1);

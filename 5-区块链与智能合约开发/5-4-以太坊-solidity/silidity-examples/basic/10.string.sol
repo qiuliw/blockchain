@@ -6,7 +6,6 @@ contract String {
 
     string public name = "lily";   
     
-    
     function setName() public {
         bytes(name)[0] = "L";   
     }

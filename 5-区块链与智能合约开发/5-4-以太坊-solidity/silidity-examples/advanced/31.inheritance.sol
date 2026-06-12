@@ -1,6 +1,7 @@
 // 测试命令: FOUNDRY_PROFILE=advanced forge test --match-path "test/advanced/31.inheritance.t.sol" -vv
 pragma solidity ^0.8.26;
 
+// 继承 ==> 虚函数 ==> 重写
 contract Base1{
   function data() public pure virtual returns(uint){
     return 1;
