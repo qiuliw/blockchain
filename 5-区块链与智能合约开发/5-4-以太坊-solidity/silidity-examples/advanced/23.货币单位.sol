@@ -1,4 +1,4 @@
-// 测试命令: FOUNDRY_PROFILE=advanced forge test --match-path "test/advanced/Adv23EthUnit.t.sol" -vv
+// 测试命令: FOUNDRY_PROFILE=advanced forge test --match-path "test/advanced/23.货币单位.t.sol" -vv
 pragma solidity ^0.8.26;
 
 contract EthUnit{

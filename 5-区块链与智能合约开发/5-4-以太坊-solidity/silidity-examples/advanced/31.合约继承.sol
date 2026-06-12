@@ -1,4 +1,4 @@
-// 测试命令: FOUNDRY_PROFILE=advanced forge test --match-path "test/advanced/Adv31Inheritance.t.sol" -vv
+// 测试命令: FOUNDRY_PROFILE=advanced forge test --match-path "test/advanced/31.合约继承.t.sol" -vv
 pragma solidity ^0.8.26;
 
 contract Base1{

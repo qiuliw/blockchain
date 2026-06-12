@@ -36,7 +36,8 @@ forge test
 FOUNDRY_PROFILE=advanced forge test
 
 # 跑单个文件
-forge test --match-path "test/basic/Basic01Integer.t.sol" -vv
+forge test --match-path "test/basic/01.integer.t.sol" -vv
+forge test --match-path "test/basic/02.publicPrivate测试.t.sol" -vv
 
 # 只看某个测试
 forge test --match-test testAdd -vvv
@@ -53,13 +54,14 @@ FOUNDRY_PROFILE=advanced forge build   # advanced/
 
 | 示例文件 | 测试文件 |
 |----------|----------|
-| `basic/01.integer.sol` | `test/basic/Basic01Integer.t.sol` |
-| `basic/16-mapping.sol` | `test/basic/Basic16Mapping.t.sol` |
-| `advanced/22.修饰器modifier.sol` | `test/advanced/Adv22Modifier.t.sol` |
-| `advanced/33.HTCoinERC20.sol` | `test/advanced/Adv33HTCoin.t.sol` |
-| … | 其余文件同理 |
+| `basic/01.integer.sol` | `test/basic/01.integer.t.sol` |
+| `basic/02.publicPrivate测试.sol` | `test/basic/02.publicPrivate测试.t.sol` |
+| `basic/16-mapping.sol` | `test/basic/16-mapping.t.sol` |
+| `advanced/22.修饰器modifier.sol` | `test/advanced/22.修饰器modifier.t.sol` |
+| `advanced/33.HTCoinERC20.sol` | `test/advanced/33.HTCoinERC20.t.sol` |
+| … | 其余文件同理（源文件名 + `.t.sol`） |
 
-含中文文件名的示例提供了 **ASCII 符号链接**（如 `02.publicPrivate.sol`），供测试 `import` 使用。
+含中文文件名的示例提供了 **ASCII 符号链接**（如 `02.publicPrivate.sol`），供测试 `import` 使用；测试文件与中文源文件同名。
 
 ## IDE 语法检查
 

@@ -1,4 +1,4 @@
-// 测试命令: forge test --match-path "test/basic/Basic02PublicPrivate.t.sol" -vv
+// 测试命令: forge test --match-path "test/basic/02.publicPrivate测试.t.sol" -vv
 pragma solidity ^0.8.26;
 
 

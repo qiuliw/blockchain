@@ -1,4 +1,4 @@
-// 测试命令: forge test --match-path "test/basic/Basic10String.t.sol" -vv
+// 测试命令: forge test --match-path "test/basic/10.string.t.sol" -vv
 pragma solidity ^0.8.26;
 
 

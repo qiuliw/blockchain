@@ -1,3 +1,4 @@
+// 测试命令: 无对应 Foundry 测试（课件演示，可用 FOUNDRY_PROFILE=advanced forge build 编译检查）
 pragma solidity ^0.8.26;
 
 

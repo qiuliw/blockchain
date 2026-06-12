@@ -1,4 +1,4 @@
-// 测试命令: forge test --match-path "test/basic/Basic16Mapping.t.sol" -vv
+// 测试命令: forge test --match-path "test/basic/16-mapping.t.sol" -vv
 pragma solidity ^0.8.26;
 
 import {Test as ForgeTest} from "forge-std/Test.sol";

@@ -1,4 +1,4 @@
-// 测试命令: forge test --match-path "test/basic/Basic07FixedBytes.t.sol" -vv
+// 测试命令: forge test --match-path "test/basic/07.内置固定长度字节数组.t.sol" -vv
 pragma solidity ^0.8.26;
 
 
