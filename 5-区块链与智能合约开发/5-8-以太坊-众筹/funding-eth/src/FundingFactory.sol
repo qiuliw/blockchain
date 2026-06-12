@@ -58,7 +58,7 @@ contract FundingFactory {
 
 //这个合约维护者全局所有参与人所参与的所有众筹合约
 contract SupportorFundingContract {
-    //     功能：mapping(address => address[]) supportorFundings
+    // 功能：mapping(address => address[]) supportorFundings
 
     // 方法1，添加合约到集合：setFunding(address _supptor, address _funding)
 
@@ -211,7 +211,6 @@ contract Funding {
         _;
     }
 
-    //s
     function getLeftTime() external view returns (uint256) {
         return endTime - block.timestamp;
     }
@@ -226,7 +225,6 @@ contract Funding {
         return allRequests.length;
     }
 
-    //
     function getRequestByIndex(uint256 i)
         external
         view

@@ -19,12 +19,6 @@
 | 5-11 | 电商拍卖 | [ebay-eth/README](./5-11-ipfs使用/ebay-eth/README.md) |
 | 5-11 | 电商完整版 | [ebay-eth-final/README](./5-11-ipfs使用/ebay-eth-final/README.md) |
 
-## 一键安装（可选）
-
-```bash
-chmod +x setup.sh && ./setup.sh
-```
-
 ## 环境
 
 | 工具 | 需要它的项目 |
