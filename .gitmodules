@@ -7,8 +7,8 @@
 [submodule "5-区块链与智能合约开发/5-8-以太坊-众筹/funding-eth/lib/forge-std"]
 	path = 5-区块链与智能合约开发/5-8-以太坊-众筹/funding-eth/lib/forge-std
 	url = https://github.com/foundry-rs/forge-std
-[submodule "5-区块链与智能合约开发/5-6-以太坊-web3/web3-project/lib/forge-std"]
-	path = 5-区块链与智能合约开发/5-6-以太坊-web3/web3-project/lib/forge-std
+[submodule "5-区块链与智能合约开发/5-6-以太坊-web3/web3-scripts/lib/forge-std"]
+	path = 5-区块链与智能合约开发/5-6-以太坊-web3/web3-scripts/lib/forge-std
 	url = https://github.com/foundry-rs/forge-std
 [submodule "5-区块链与智能合约开发/5-11-ipfs使用/ebay-eth/lib/forge-std"]
 	path = 5-区块链与智能合约开发/5-11-ipfs使用/ebay-eth/lib/forge-std

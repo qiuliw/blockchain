@@ -1,4 +1,4 @@
-# truffle-react-web3
+# web3-react-demo
 
 Truffle 合约 + web3.js API 演示 + React 前端。
 

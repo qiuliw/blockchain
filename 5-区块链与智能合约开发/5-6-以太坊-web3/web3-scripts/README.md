@@ -1,6 +1,6 @@
-# web3-project
+# web3-scripts
 
-Foundry 合约 + web3.js 链上交互示例（`SimpleStorage`）。
+Foundry 合约 + web3.js 脚本链上交互示例（`SimpleStorage`）。
 
 ## 快速开始
 
@@ -28,5 +28,3 @@ npm run interact
 | `scripts/sync-abi.js` | 同步 Foundry 编译 ABI |
 | `03-instance.js` | 创建 web3 合约实例 |
 | `04-interaction.js` | 读写演示 |
-
-上级目录说明见 [../README.md](../README.md)。
