@@ -1,5 +1,5 @@
-var Web3 = require('Web3')
-var web3 = new Web3()
+const { Web3 } = require('web3')
+const web3 = new Web3()
 
 console.log(web3.utils.toHex('a'))
 console.log(web3.utils.toHex(1234))

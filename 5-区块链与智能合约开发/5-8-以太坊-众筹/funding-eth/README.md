@@ -6,7 +6,7 @@ React + web3.js 众筹前端，对接 Foundry 版 `FundingFactory.sol`。
 
 - Node.js 18+（前端）
 - [Foundry](https://book.getfoundry.sh/)
-- Anvil :8545 或 Ganache :7545
+- Anvil :8545
 - 浏览器 MetaMask
 
 ## 合约（Solidity 0.8.26）
@@ -40,12 +40,6 @@ npm start
 ```
 
 浏览器打开 http://localhost:3000。部署后把工厂合约地址写入 `src/eth/instance.js`。
-
-## 联调准备
-
-1. 启动 Anvil（8545）
-2. MetaMask 连接本地链，导入测试账户
-3. 在前端创建众筹项目、投资、发起/投票花费请求
 
 ## 目录
 

@@ -1,0 +1,23 @@
+{
+  "../../5-11-ipfs使用/ebay-eth/lib/forge-std": {
+    "rev": "620536fa5277db4e3fd46772d5cbc1ea0696fb43"
+  },
+  "../../5-4-以太坊-solidity/silidity-examples/lib/forge-std": {
+    "rev": "257559546b763ec5fa7371fb77fef9102db86446"
+  },
+  "../../5-6-以太坊-web3/web3-scripts/lib/forge-std": {
+    "rev": "620536fa5277db4e3fd46772d5cbc1ea0696fb43"
+  },
+  "../../5-7-以太坊-彩票/lottery-eth/lib/forge-std": {
+    "rev": "620536fa5277db4e3fd46772d5cbc1ea0696fb43"
+  },
+  "../../5-8-以太坊-众筹/funding-eth/lib/forge-std": {
+    "rev": "620536fa5277db4e3fd46772d5cbc1ea0696fb43"
+  },
+  "lib/forge-std": {
+    "tag": {
+      "name": "v1.16.1",
+      "rev": "620536fa5277db4e3fd46772d5cbc1ea0696fb43"
+    }
+  }
+}

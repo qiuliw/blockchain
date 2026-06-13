@@ -13,3 +13,15 @@
 [submodule "5-区块链与智能合约开发/5-11-ipfs使用/ebay-eth/lib/forge-std"]
 	path = 5-区块链与智能合约开发/5-11-ipfs使用/ebay-eth/lib/forge-std
 	url = https://github.com/foundry-rs/forge-std
+[submodule "5-区块链与智能合约开发/5-9-以太坊-foundry/foundry-init/lib/forge-std"]
+	path = 5-区块链与智能合约开发/5-9-以太坊-foundry/foundry-init/lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
+[submodule "5-区块链与智能合约开发/5-11-ipfs使用/ipfs-demo/lib/forge-std"]
+	path = 5-区块链与智能合约开发/5-11-ipfs使用/ipfs-demo/lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
+[submodule "5-区块链与智能合约开发/5-10-以太坊-web3-react/web3-react-demo/lib/forge-std"]
+	path = 5-区块链与智能合约开发/5-10-以太坊-web3-react/web3-react-demo/lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
+[submodule "5-区块链与智能合约开发/5-11-ipfs使用/ebay-eth-final/lib/forge-std"]
+	path = 5-区块链与智能合约开发/5-11-ipfs使用/ebay-eth-final/lib/forge-std
+	url = https://github.com/foundry-rs/forge-std

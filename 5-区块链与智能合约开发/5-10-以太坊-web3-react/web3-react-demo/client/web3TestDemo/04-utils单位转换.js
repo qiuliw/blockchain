@@ -1,5 +1,5 @@
-var Web3 = require('Web3')
-var web3 = new Web3()
+const { Web3 } = require('web3')
+const web3 = new Web3()
 
 console.log('\n将wei转换为ether, Gwei, Mwei')
 console.log(web3.utils.fromWei('12345567890876433', 'ether'))

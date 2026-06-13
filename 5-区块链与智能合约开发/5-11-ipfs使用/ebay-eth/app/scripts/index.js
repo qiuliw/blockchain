@@ -1,12 +1,12 @@
 import '../styles/app.css'
-import {default as Web3} from 'web3'
-import {default as contract} from 'truffle-contract'
-import EcommerceStoreArtifact from '../../abi/EcommerceStore.json'
-import storeConfig from '../contracts-config'
+import { Web3 } from 'web3'
+import abi from '../eth/abi.json'
 
 import $ from 'jquery'
 
-const ecommerceStoreContract = contract(EcommerceStoreArtifact)
+// 部署后填入 forge script 输出的合约地址
+const storeAddress = ''
+
 let ecommerceStoreInstance
 
 const App = {
@@ -14,24 +14,22 @@ const App = {
         // Bootstrap the MetaCoin abstraction for Use.
         console.log('init !!!!!')
 
-        ecommerceStoreContract.setProvider(window.web3.currentProvider)
-
-        if (!storeConfig.contractAddress) {
-            throw new Error('请先在 app/contracts-config.js 设置合约地址')
+        if (!storeAddress) {
+            throw new Error('请先在 app/scripts/index.js 设置 storeAddress')
         }
 
-        ecommerceStoreInstance = await ecommerceStoreContract.at(storeConfig.contractAddress)
+        ecommerceStoreInstance = new window.web3.eth.Contract(abi, storeAddress)
 
         // let accounts = await web3.eth.getAccounts()
         //
-        // let res = await ecommerceStoreInstance.addProductToStore(
-        //     '衣服', '服装', 'imagelink111', 'descLink222', 2018, 2019, 10, 0, {
+        // let res = await ecommerceStoreInstance.methods.addProductToStore(
+        //     '衣服', '服装', 'imagelink111', 'descLink222', 2018, 2019, 10, 0).send({
         //         from: accounts[0]
         //     })
         //
         // console.log('res :', res)
         //
-        // res = await ecommerceStoreInstance.getProductById(1)
+        // res = await ecommerceStoreInstance.methods.getProductById(1).call()
         // console.log('res product info :', res)
 
         renderProducts()
@@ -41,12 +39,13 @@ const App = {
 
 function renderProducts() {
     // 1. 获取所有的产品数量
-    ecommerceStoreInstance.productIndex().then(productIndex => {
+    ecommerceStoreInstance.methods.productIndex().call().then(productIndex => {
         // 注意！！
         console.log('productIndex:', productIndex)
-        for (let i = 1; i <= productIndex; i++) {
+        const count = Number(productIndex)
+        for (let i = 1; i <= count; i++) {
             // 2. 获取每个产品的信息
-            ecommerceStoreInstance.getProductById(i).then(productInfo => {
+            ecommerceStoreInstance.methods.getProductById(i).call().then(productInfo => {
                 let id = productInfo.id || productInfo[0]
                 let name = productInfo.name || productInfo[1]
                 let category = productInfo.category || productInfo[2]
@@ -63,19 +62,19 @@ function renderProducts() {
                 // 类别
                 node.append(`<div>${category}</div>`)
                 // 竞拍起始时间
-                let startT = new Date(auctionStartTime * 1000)
+                let startT = new Date(Number(auctionStartTime) * 1000)
                 node.append(`<div>${startT}</div>`)
                 // 竞拍结束时间
-                let endT = new Date(auctionEndTime * 1000)
+                let endT = new Date(Number(auctionEndTime) * 1000)
                 node.append(`<div>${endT}</div>`)
                 // 竞拍起始价格
                 // 注意！！！
                 // 旧版本：web3.fromWei
                 // 新版本：web3.utils.fromWei(number [, unit])
-                // let price = window.utils.web3.fromWei(startPrice, 'ether')
+                // let price = window.web3.utils.fromWei(startPrice, 'ether')
                 // node.append(`<div>${price}</div>`)
                 // 按钮detail
-                node.append(`<a href="product.html?id=${id.c ? id.c[0] : id}">Details</a>`)
+                node.append(`<a href="product.html?id=${id}">Details</a>`)
 
                 // 4.组合append到id="product-list中
                 $('#product-list').append(node)
@@ -86,13 +85,14 @@ function renderProducts() {
 
 window.App = App
 
-window.addEventListener('load', function () {
-    if (typeof web3 !== 'undefined') {
+window.addEventListener('load', async function () {
+    if (window.ethereum) {
         console.warn('Injected web3')
-        window.web3 = new Web3(web3.currentProvider)
+        window.web3 = new Web3(window.ethereum)
+        await window.ethereum.request({ method: 'eth_requestAccounts' })
     } else {
         console.warn('local web3 found!')
-        window.web3 = new Web3(new Web3.providers.HttpProvider('http://127.0.0.1:8545'))
+        window.web3 = new Web3('http://127.0.0.1:8545')
     }
 
     App.start()

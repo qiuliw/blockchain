@@ -5,31 +5,33 @@ day12 完整版：在 ebay-eth 基础上增加 IPFS 图片/描述上传。
 ## 环境
 
 - Node.js 18+
-- Ganache（7545）
+- [Foundry](https://book.getfoundry.sh/)
+- Anvil（本地链，默认 :8545）
 - MetaMask
 - IPFS daemon（5001，上传商品图片时需要）
 
-## 安装
-
-依赖与 `ebay-eth` 相同。若安装失败，可从 ebay-eth 复制 node_modules：
+## 合约（Solidity 0.8.26）
 
 ```bash
-# 在 5-11-ipfs使用/ 目录下
-cp -a ebay-eth/node_modules ebay-eth-final/node_modules
+cd ebay-eth-final
+forge install foundry-rs/forge-std
+
+forge test
+npm run build:contract    # forge build + 生成 app/eth/abi.json
+
+anvil
+npm run deploy:local
+# 将部署地址写入 app/scripts/index.js 的 storeAddress
 ```
 
-或：
+## 前端
 
 ```bash
 npm install --ignore-scripts
-```
-
-## 运行
-
-```bash
-npm run compile
 npm run dev
 ```
+
+浏览器打开 webpack-dev-server 提示的地址（通常 http://localhost:8080）。
 
 ## 与 ebay-eth 的区别
 
@@ -42,9 +44,18 @@ npm run dev
 ipfs daemon   # 端口 5001
 ```
 
+## 目录
+
+```
+ebay-eth-final/
+├── src/EcommerceStore.sol
+├── test/EcommerceStore.t.sol
+├── script/
+├── app/eth/abi.json      # build:contract 生成
+├── app/                  # 前端入口
+└── webpack.config.js
+```
+
 ## WSL 提示
 
-```bash
-export PATH="/usr/bin:$PATH"
-npm run compile
-```
+若 webpack 报 OpenSSL 错误，脚本已内置 `NODE_OPTIONS=--openssl-legacy-provider`。

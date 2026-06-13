@@ -1,0 +1,421 @@
+[
+  {
+    "type": "constructor",
+    "inputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "addProductToStore",
+    "inputs": [
+      {
+        "name": "_name",
+        "type": "string",
+        "internalType": "string"
+      },
+      {
+        "name": "_category",
+        "type": "string",
+        "internalType": "string"
+      },
+      {
+        "name": "_imageLink",
+        "type": "string",
+        "internalType": "string"
+      },
+      {
+        "name": "_descLink",
+        "type": "string",
+        "internalType": "string"
+      },
+      {
+        "name": "_startTime",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "_endTime",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "_startPrice",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "condition",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "bid",
+    "inputs": [
+      {
+        "name": "_productId",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "_idealPrice",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "_secret",
+        "type": "string",
+        "internalType": "string"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "payable"
+  },
+  {
+    "type": "function",
+    "name": "finalaizeAuction",
+    "inputs": [
+      {
+        "name": "_productId",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "getBidById",
+    "inputs": [
+      {
+        "name": "_productId",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "_idealPrice",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "_secret",
+        "type": "string",
+        "internalType": "string"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "",
+        "type": "bool",
+        "internalType": "bool"
+      },
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getEscrowInfo",
+    "inputs": [
+      {
+        "name": "_productId",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getHighestBidInfo",
+    "inputs": [
+      {
+        "name": "_productId",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getProductById",
+    "inputs": [
+      {
+        "name": "_productId",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "info",
+        "type": "tuple",
+        "internalType": "struct EcommerceStore.ProductInfo",
+        "components": [
+          {
+            "name": "id",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "name",
+            "type": "string",
+            "internalType": "string"
+          },
+          {
+            "name": "category",
+            "type": "string",
+            "internalType": "string"
+          },
+          {
+            "name": "imageLink",
+            "type": "string",
+            "internalType": "string"
+          },
+          {
+            "name": "descLink",
+            "type": "string",
+            "internalType": "string"
+          },
+          {
+            "name": "auctionStartTime",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "auctionEndTime",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "startPrice",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "status",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "highestBidder",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "highestBid",
+            "type": "uint256",
+            "internalType": "uint256"
+          }
+        ]
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "giveToBuyer",
+    "inputs": [
+      {
+        "name": "_productId",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "giveToSeller",
+    "inputs": [
+      {
+        "name": "_productId",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "productIdToOwner",
+    "inputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "productIndex",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "productToEscrow",
+    "inputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "revealBid",
+    "inputs": [
+      {
+        "name": "_productId",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "_idealPrice",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "_secret",
+        "type": "string",
+        "internalType": "string"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "event",
+    "name": "revealEvent",
+    "inputs": [
+      {
+        "name": "productid",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
+        "name": "bidId",
+        "type": "bytes32",
+        "indexed": false,
+        "internalType": "bytes32"
+      },
+      {
+        "name": "idealPrice",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
+        "name": "price",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
+        "name": "refund",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
+  }
+]

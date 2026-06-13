@@ -1,7 +1,6 @@
 import '../styles/app.css'
-import {default as Web3} from 'web3'
-import {default as contract} from 'truffle-contract'
-import EcommerceStoreArtifact from '../../build/contracts/EcommerceStore.json'
+import { Web3 } from 'web3'
+import abi from '../eth/abi.json'
 import ipfsAPI from 'ipfs-api'
 
 import $ from 'jquery'
@@ -12,7 +11,9 @@ const ipfs = ipfsAPI({
     protocol: 'http'
 })
 
-const ecommerceStoreContract = contract(EcommerceStoreArtifact)
+// 部署后填入 forge script 输出的合约地址
+const storeAddress = ''
+
 let ecommerceStoreInstance
 
 const App = {
@@ -20,9 +21,11 @@ const App = {
         // Bootstrap the MetaCoin abstraction for Use.
         console.log('init !!!!!')
 
-        ecommerceStoreContract.setProvider(window.web3.currentProvider)
+        if (!storeAddress) {
+            throw new Error('请先在 app/scripts/index.js 设置 storeAddress')
+        }
 
-        ecommerceStoreInstance = await ecommerceStoreContract.deployed()
+        ecommerceStoreInstance = new window.web3.eth.Contract(abi, storeAddress)
 
         renderProducts()
 
@@ -50,30 +53,32 @@ const App = {
 
             console.log('in bid, productId:', productId)
 
-            let bigNumberAmount = web3.utils.toBN(bidAmount)
-            console.log('bigNumberAmount:', bigNumberAmount.toNumber())
+            let bigNumberAmount = BigInt(bidAmount)
+            console.log('bigNumberAmount:', Number(bigNumberAmount))
 
             console.log('bidAcmount byte :', typeof bidAmount) //string
 
-            let bytesHash = web3.utils.soliditySha3(bidAmount, secretText)
+            let bytesHash = window.web3.utils.soliditySha3(
+                { type: 'uint256', value: bidAmount },
+                { type: 'string', value: secretText }
+            )
             console.log('hash str:', bytesHash)
 
-            let bytesHash1 = web3.utils.soliditySha3(bigNumberAmount.toNumber(), secretText)
+            let bytesHash1 = window.web3.utils.soliditySha3(
+                { type: 'uint256', value: Number(bigNumberAmount) },
+                { type: 'string', value: secretText }
+            )
             console.log('hash1 num:', bytesHash1)
             //
             web3.eth.getAccounts().then(accounts => {
 
                 // console.log('accounts :', accounts)
-                // ecommerceStoreInstance.bid(parseInt(productId), bigNumberAmount.toNumber(), secretText, {
-                ecommerceStoreInstance.bid(parseInt(productId), bytesHash, {
+                ecommerceStoreInstance.methods.bid(parseInt(productId), Number(bigNumberAmount), secretText).send({
                     from: accounts[0],
                     value: bidSend
 
                 }).then(result => {
-                    ecommerceStoreInstance.testHash(bigNumberAmount.toNumber(), secretText).then(r => {
-                        // ecommerceStoreInstance.testHash(bidAmount, secretText).then(r => {
-                        console.log('hash1 :', r)
-                    })
+                    console.log('hash1 :', bytesHash1)
                     // console.log('bid result :', result)
                     // location.reload(true)
 
@@ -92,16 +97,18 @@ const App = {
             let secretText = $('#reveal-secret-text').val()
             let productId = $('#product-id').val()
 
-            let bigNumberAmount = web3.utils.toBN(actualAmount)
-            console.log('bigNumberAmount:', bigNumberAmount.toNumber())
+            let bigNumberAmount = BigInt(actualAmount)
+            console.log('bigNumberAmount:', Number(bigNumberAmount))
 
-            ecommerceStoreInstance.testHash(bigNumberAmount.toNumber(), secretText).then(res => {
-                console.log('testHash : ', res)
-            })
+            let testHash = window.web3.utils.soliditySha3(
+                { type: 'uint256', value: Number(bigNumberAmount) },
+                { type: 'string', value: secretText }
+            )
+            console.log('testHash : ', testHash)
 
             web3.eth.getAccounts().then(accounts => {
 
-                ecommerceStoreInstance.revealBid(parseInt(productId), bigNumberAmount.toNumber(), secretText, {
+                ecommerceStoreInstance.methods.revealBid(parseInt(productId), Number(bigNumberAmount), secretText).send({
                     from: accounts[0]
 
                 }).then(result => {
@@ -123,7 +130,7 @@ const App = {
 
             web3.eth.getAccounts().then(accounts => {
 
-                ecommerceStoreInstance.finalaizeAuction(parseInt(productId), {
+                ecommerceStoreInstance.methods.finalaizeAuction(parseInt(productId)).send({
                     from: accounts[0]
 
                 }).then(result => {
@@ -148,7 +155,7 @@ const App = {
 
             web3.eth.getAccounts().then(accounts => {
 
-                ecommerceStoreInstance.giveToSeller(id, {
+                ecommerceStoreInstance.methods.giveToSeller(id).send({
                     from: accounts[0]
 
                 }).then(result => {
@@ -171,7 +178,7 @@ const App = {
 
             web3.eth.getAccounts().then(accounts => {
 
-                ecommerceStoreInstance.giveToBuyer(id, {
+                ecommerceStoreInstance.methods.giveToBuyer(id).send({
                     from: accounts[0]
                 }).then(result => {
                     alert('向买家投票成功!')
@@ -260,11 +267,13 @@ function saveProductToBlockChain(parameters, imageHash, descHash) {
 
     web3.eth.getAccounts().then(accounts => {
 
-        ecommerceStoreInstance.addProductToStore(name, category, imageHash, descHash,
-            startTimeInSeconds, endTimeInSeconds, startPrice, condition, {
-                from: accounts[0]
+        ecommerceStoreInstance.methods.addProductToStore(
+            name, category, imageHash, descHash,
+            startTimeInSeconds, endTimeInSeconds, startPrice, condition
+        ).send({
+            from: accounts[0]
 
-            }).then(result => {
+        }).then(result => {
             console.log('addProductToStore result : ', result)
 
         }).catch(e => {
@@ -292,13 +301,19 @@ function saveDescInfoToIpfs(productDescInfo) {
 
 function renderProducts() {
     // 1. 获取所有的产品数量
-    ecommerceStoreInstance.productIndex().then(productIndex => {
+    ecommerceStoreInstance.methods.productIndex().call().then(productIndex => {
         // 注意！！
         console.log('productIndex:', productIndex)
-        for (let i = 1; i <= productIndex; i++) {
+        for (let i = 1; i <= Number(productIndex); i++) {
             // 2. 获取每个产品的信息
-            ecommerceStoreInstance.getProductById(i).then(productInfo => {
-                let {0: id, 1: name, 2: category, 3: imageLink, 4: descLink, 5: auctionStartTime, 6: auctionEndTime, 7: startPrice, 8: status} = productInfo
+            ecommerceStoreInstance.methods.getProductById(i).call().then(productInfo => {
+                let id = productInfo.id || productInfo[0]
+                let name = productInfo.name || productInfo[1]
+                let category = productInfo.category || productInfo[2]
+                let imageLink = productInfo.imageLink || productInfo[3]
+                let auctionStartTime = productInfo.auctionStartTime || productInfo[5]
+                let auctionEndTime = productInfo.auctionEndTime || productInfo[6]
+                let startPrice = productInfo.startPrice || productInfo[7]
                 // 3. 每个产品创建一个node，填充数据，
                 // console.table(productInfo)
                 let node = $('<div/>')
@@ -309,19 +324,19 @@ function renderProducts() {
                 // 类别
                 node.append(`<div>${category}</div>`)
                 // 竞拍起始时间
-                let startT = new Date(auctionStartTime * 1000)
+                let startT = new Date(Number(auctionStartTime) * 1000)
                 node.append(`<div>${startT}</div>`)
                 // 竞拍结束时间
-                let endT = new Date(auctionEndTime * 1000)
+                let endT = new Date(Number(auctionEndTime) * 1000)
                 node.append(`<div>${endT}</div>`)
                 // 竞拍起始价格
                 // 注意！！！
                 // 旧版本：web3.fromWei
                 // 新版本：web3.utils.fromWei(number [, unit])
-                let price = window.web3.utils.fromWei(startPrice.toString(), 'ether')
+                let price = window.web3.utils.fromWei(String(startPrice), 'ether')
                 node.append(`<div>${price}</div>`)
                 // 按钮detail
-                node.append(`<a href="product.html?id=${id.c[0]}">Details</a>`)
+                node.append(`<a href="product.html?id=${Number(id)}">Details</a>`)
 
                 // 4.组合append到id="product-list中
                 $('#product-list').append(node)
@@ -345,11 +360,15 @@ function getProductId() {
 }
 
 function renderProductDetail(id) {
-    ecommerceStoreInstance.getProductById(id).then(productInfo => {
-        let {
-            0: id, 1: name, 2: category, 3: imageLink, 4: descLink, 5: auctionStartTime,
-            6: auctionEndTime, 7: startPrice, 8: status
-        } = productInfo
+    ecommerceStoreInstance.methods.getProductById(id).call().then(productInfo => {
+        let productId = productInfo.id || productInfo[0]
+        let name = productInfo.name || productInfo[1]
+        let imageLink = productInfo.imageLink || productInfo[3]
+        let descLink = productInfo.descLink || productInfo[4]
+        let auctionStartTime = productInfo.auctionStartTime || productInfo[5]
+        let auctionEndTime = productInfo.auctionEndTime || productInfo[6]
+        let startPrice = productInfo.startPrice || productInfo[7]
+        let status = productInfo.status || productInfo[8]
 
         console.log('productInfo : ', productInfo)
         //显示图片
@@ -376,7 +395,7 @@ function renderProductDetail(id) {
         // 3. 产品的名称
         $('#product-name').text(name)
         // 4. 保存product-id到这个页面，后面的标签会使用到  duke
-        $('#product-id').val(id)
+        $('#product-id').val(productId)
 
 
         //++++++++++++++++++++++
@@ -415,16 +434,22 @@ function renderProductDetail(id) {
             // 4. 显示当前中标的信息（第三方合约信息：买家，卖家，仲裁人，投票情况）
             $('#escrow-info').show()
             let finalPrice
-            ecommerceStoreInstance.getHighestBidInfo.call(id).then(info => {
-                const {0: highestBidder, 1: highestBid, 2: secondBid} = info
+            ecommerceStoreInstance.methods.getHighestBidInfo(id).call().then(info => {
+                const highestBidder = info[0]
+                const highestBid = info[1]
+                const secondBid = info[2]
                 finalPrice = secondBid
                 $('#product-status').html(`<p>产品状态：揭标已结束，最高价：${displayPrice(highestBid)}, 开始进入仲裁投票阶段!</p>`)
             })
 
-            ecommerceStoreInstance.getEscrowInfo.call(id).then(escroInfo => {
+            ecommerceStoreInstance.methods.getEscrowInfo(id).call().then(escroInfo => {
                 console.log('escroInfo:', escroInfo)
                 // return (buyer, seller, arbiter, buyerVotesCount, sellerVotesCount);
-                const {0: buyer, 1: seller, 2: arbiter, 3: buyerVotesCount, 4: sellerVotesCount} = escroInfo
+                const buyer = escroInfo[0]
+                const seller = escroInfo[1]
+                const arbiter = escroInfo[2]
+                const buyerVotesCount = escroInfo[3]
+                const sellerVotesCount = escroInfo[4]
                 $('#buyer').html(`<p>买家：${buyer}</p>`)
                 $('#seller').html(`<p>卖家：${seller}</p>`)
                 $('#arbiter').html(`<p>仲裁：${arbiter}</p>`)
@@ -433,7 +458,7 @@ function renderProductDetail(id) {
                     $('#refund-count').html(`<p>商品未成交，已退款给买家!`)
                     $('#product-status').html(`<p>产品状态：拍卖已结束!</p>`)
                 } else if (parseInt(sellerVotesCount) === 2) {
-                    $('#release-count').html(`<p>商品成交，已付款给卖家, 成交价：${web3.utils.fromWei(finalPrice.toString(), 'ether')} ETH`)
+                    $('#release-count').html(`<p>商品成交，已付款给卖家, 成交价：${web3.utils.fromWei(String(finalPrice), 'ether')} ETH`)
                     $('#product-status').html(`<p>产品状态：拍卖已结束</p>`)
                 } else {
                     $('#refund-count').html(`<p>买家获得: ${buyerVotesCount}/3 票`)
@@ -456,12 +481,12 @@ function renderProductDetail(id) {
 window.App = App
 
 window.addEventListener('load', function () {
-    if (typeof web3 !== 'undefined') {
+    if (window.ethereum) {
         console.warn('Injected web3')
-        window.web3 = new Web3(web3.currentProvider)
+        window.web3 = new Web3(window.ethereum)
     } else {
         console.warn('local web3 found!')
-        window.web3 = new Web3(new Web3.providers.HttpProvider('http://127.0.0.1:9545'))
+        window.web3 = new Web3('http://127.0.0.1:8545')
     }
 
     App.start()
@@ -469,7 +494,7 @@ window.addEventListener('load', function () {
 
 
 function displayPrice(price) {
-    return window.web3.utils.fromWei(price.toString(), 'ether') + 'ETH'
+    return window.web3.utils.fromWei(String(price), 'ether') + 'ETH'
 }
 
 function getCurrentTimeInSeconds() {
@@ -478,7 +503,7 @@ function getCurrentTimeInSeconds() {
 
 function displayEndHours(seconds) {
     let currentTime = getCurrentTimeInSeconds()
-    let remainingSeconds = seconds - currentTime
+    let remainingSeconds = Number(seconds) - currentTime
 
     if (remainingSeconds <= 0) {
         return 'Auction has ended'

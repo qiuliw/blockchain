@@ -6,7 +6,7 @@ React 前端 + Foundry 彩票合约 DApp。
 
 - Node.js 18+（前端）
 - [Foundry](https://book.getfoundry.sh/)（合约编译 / 测试 / 部署）
-- Anvil :8545 或 Ganache :7545（链上联调）
+- Anvil :8545（链上联调）
 - 浏览器 MetaMask
 
 ## 合约（Solidity 0.8.26）

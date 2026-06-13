@@ -3,16 +3,14 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "compile": "node node_modules/truffle/build/cli.bundled.js compile",
-    "test": "node node_modules/truffle/build/cli.bundled.js test",
+    "test:contract": "forge test",
+    "build:contract": "forge build",
+    "deploy:local": "forge script script/DeploySimpleStorage.s.sol:DeploySimpleStorage --rpc-url http://127.0.0.1:8545 --broadcast",
     "client:install": "npm install --prefix client --ignore-scripts",
     "client:start": "npm start --prefix client",
     "demo": "node client/web3TestDemo/01-eth相关.js"
   },
-  "devDependencies": {
-    "truffle": "5.11.5"
-  },
   "dependencies": {
-    "web3": "1.10.4"
+    "web3": "4.16.0"
   }
 }

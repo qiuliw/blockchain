@@ -1,0 +1,13 @@
+{
+  "name": "ipfs-demo",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "test:contract": "forge test",
+    "build:contract": "forge build",
+    "deploy:local": "forge script script/DeploySimpleStorage.s.sol:DeploySimpleStorage --rpc-url http://127.0.0.1:8545 --broadcast",
+    "client:install": "npm install --prefix client --ignore-scripts",
+    "client:start": "npm start --prefix client",
+    "ipfs:test": "node client/01-ipfs-api-test.js"
+  }
+}
