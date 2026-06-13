@@ -1,36 +1,21 @@
 {
   "name": "ebay-eth-final",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
+  "packageManager": "pnpm@11.5.3",
   "scripts": {
     "test:contract": "forge test",
     "build:contract": "forge build && node scripts/sync-abi.js",
     "deploy:local": "dotenv -- forge script script/DeployEcommerceStore.s.sol:DeployEcommerceStore --rpc-url $RPC_URL --broadcast --sender $DEPLOYER_ADDRESS --unlocked",
-    "dev": "NODE_OPTIONS=--openssl-legacy-provider webpack-dev-server --config webpack.config.js",
-    "build:webpack": "NODE_OPTIONS=--openssl-legacy-provider webpack-cli --config webpack.config.js"
+    "dev": "pnpm -C frontend dev",
+    "build": "pnpm -C frontend build",
+    "preview": "pnpm -C frontend preview",
+    "ipfs:start": "bash scripts/start-ipfs.sh",
+    "frontend:install": "pnpm -C frontend install",
+    "install:all": "pnpm install && pnpm -C frontend install"
   },
   "devDependencies": {
-    "babel-core": "^6.26.3",
-    "babel-loader": "^7.1.5",
-    "babel-plugin-transform-object-rest-spread": "^6.26.0",
-    "babel-plugin-transform-react-jsx": "^6.24.1",
-    "babel-plugin-transform-runtime": "^6.23.0",
-    "babel-preset-env": "^1.7.0",
-    "copy-webpack-plugin": "^4.6.0",
-    "css-loader": "^0.28.11",
     "dotenv": "^16.4.5",
-    "dotenv-cli": "^7.4.2",
-    "html-webpack-plugin": "^3.2.0",
-    "sass": "^1.77.0",
-    "sass-loader": "^7.3.1",
-    "style-loader": "^0.23.1",
-    "webpack": "^4.47.0",
-    "webpack-cli": "^3.3.12",
-    "webpack-dev-server": "^3.11.3"
-  },
-  "dependencies": {
-    "ipfs-api": "^26.1.2",
-    "jquery": "^3.7.1",
-    "web3": "4.16.0"
+    "dotenv-cli": "^7.4.2"
   }
 }

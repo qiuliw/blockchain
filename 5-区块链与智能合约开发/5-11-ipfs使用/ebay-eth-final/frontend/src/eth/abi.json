@@ -62,6 +62,29 @@
         "internalType": "uint256"
       },
       {
+        "name": "_commitHash",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "payable"
+  },
+  {
+    "type": "function",
+    "name": "computeCommitHash",
+    "inputs": [
+      {
+        "name": "_productId",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "_bidder",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
         "name": "_idealPrice",
         "type": "uint256",
         "internalType": "uint256"
@@ -72,8 +95,14 @@
         "internalType": "string"
       }
     ],
-    "outputs": [],
-    "stateMutability": "payable"
+    "outputs": [
+      {
+        "name": "",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ],
+    "stateMutability": "view"
   },
   {
     "type": "function",
@@ -90,7 +119,46 @@
   },
   {
     "type": "function",
-    "name": "getBidById",
+    "name": "getBidByCommit",
+    "inputs": [
+      {
+        "name": "_productId",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "_commitHash",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "",
+        "type": "bool",
+        "internalType": "bool"
+      },
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getBidByReveal",
     "inputs": [
       {
         "name": "_productId",
@@ -383,6 +451,37 @@
   },
   {
     "type": "event",
+    "name": "BidCommitted",
+    "inputs": [
+      {
+        "name": "productId",
+        "type": "uint256",
+        "indexed": true,
+        "internalType": "uint256"
+      },
+      {
+        "name": "bidder",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "commitHash",
+        "type": "bytes32",
+        "indexed": false,
+        "internalType": "bytes32"
+      },
+      {
+        "name": "confusePrice",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
     "name": "revealEvent",
     "inputs": [
       {
@@ -392,7 +491,7 @@
         "internalType": "uint256"
       },
       {
-        "name": "bidId",
+        "name": "commitHash",
         "type": "bytes32",
         "indexed": false,
         "internalType": "bytes32"

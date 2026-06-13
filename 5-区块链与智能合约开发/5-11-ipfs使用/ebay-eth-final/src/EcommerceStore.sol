@@ -38,7 +38,7 @@ contract EcommerceStore {
         uint256 totalBids; //所有的竞标数量
 
         //一个商品，所有人都可以竞标，并且，同一个人可以多次竞标
-        //Byes32是理想价格与密文生成的的哈希值
+        // bytes32 是 computeCommitHash 算出的承诺哈希
         mapping(address => mapping(bytes32 => Bid)) bids;
 
         //第三部分：揭标信息
@@ -82,7 +82,20 @@ contract EcommerceStore {
     //key是产品id，value：是第三方合约
     mapping(uint256 => address) public productToEscrow;
 
-    event revealEvent(uint256 productid, bytes32 bidId, uint256 idealPrice, uint256 price, uint256 refund);
+    event BidCommitted(uint256 indexed productId, address indexed bidder, bytes32 commitHash, uint256 confusePrice);
+
+    event revealEvent(uint256 productid, bytes32 commitHash, uint256 idealPrice, uint256 price, uint256 refund);
+
+    // 承诺哈希 = keccak256(abi.encode(chainId, 本合约, 商品id, 竞标人, 理想出价, 秘密))
+    // 秘密：用户自备随机量，防别人猜
+    // 其余字段：绑定链/合约/商品/地址，防撞 hash、防重放
+    function computeCommitHash(uint256 _productId, address _bidder, uint256 _idealPrice, string memory _secret)
+        public
+        view
+        returns (bytes32)
+    {
+        return keccak256(abi.encode(block.chainid, address(this), _productId, _bidder, _idealPrice, _secret));
+    }
 
     function addProductToStore(
         string memory _name,
@@ -116,42 +129,44 @@ contract EcommerceStore {
         productIdToOwner[productIndex] = msg.sender;
     }
 
-    // 竞标函数：
-    //正常是传理想价格和密文的哈希过来，为了简化，先直接传过来，方便测试
-    // 1. 创建一个竞标（产品id，理想价格，密文）
-    // 2. 找到Product，将竞标放入bids结构中
-    // mapping(address => mapping(bytes32 => Bid)) bids;
-
-    function bid(uint256 _productId, uint256 _idealPrice, string memory _secret) external payable {
-        bytes memory bytesInfo = abi.encodePacked(_idealPrice, _secret);
-        bytes32 bytesHash = keccak256(bytesInfo);
+    // 竞标：只传 commitHash，理想出价和秘密不直接上链
+    function bid(uint256 _productId, bytes32 _commitHash) external payable {
+        require(_commitHash != bytes32(0), "empty commit");
 
         address owner = productIdToOwner[_productId];
 
-        //注意，一定是storage类型，否则无法改变sotres内的产品信息
         Product storage product = stores[owner][_productId];
 
-        //限定竞标价格不小于起拍价格
         require(msg.value >= product.startPrice);
+        require(product.bids[msg.sender][_commitHash].bidder == address(0), "commit exists");
 
         product.totalBids++;
         Bid memory bidLocal = Bid(_productId, msg.value, false, msg.sender);
-        product.bids[msg.sender][bytesHash] = bidLocal;
+        product.bids[msg.sender][_commitHash] = bidLocal;
+
+        emit BidCommitted(_productId, msg.sender, _commitHash, msg.value);
     }
 
-    //返回某一个竞标的详情
-    function getBidById(uint256 _productId, uint256 _idealPrice, string memory _secret)
+    // 用 commitHash 查竞标
+    function getBidByCommit(uint256 _productId, bytes32 _commitHash)
         external
         view
         returns (uint256, uint256, bool, address)
     {
         Product storage product = stores[productIdToOwner[_productId]][_productId];
+        Bid memory bidLocal = product.bids[msg.sender][_commitHash];
+        return (bidLocal.productId, bidLocal.price, bidLocal.isRevealed, bidLocal.bidder);
+    }
 
-        bytes memory bytesInfo = abi.encodePacked(_idealPrice, _secret);
-        bytes32 bytesHash = keccak256(bytesInfo);
-
-        Bid memory bidLocal = product.bids[msg.sender][bytesHash];
-
+    // 用理想出价+秘密查竞标
+    function getBidByReveal(uint256 _productId, uint256 _idealPrice, string memory _secret)
+        external
+        view
+        returns (uint256, uint256, bool, address)
+    {
+        bytes32 commitHash = computeCommitHash(_productId, msg.sender, _idealPrice, _secret);
+        Product storage product = stores[productIdToOwner[_productId]][_productId];
+        Bid memory bidLocal = product.bids[msg.sender][commitHash];
         return (bidLocal.productId, bidLocal.price, bidLocal.isRevealed, bidLocal.bidder);
     }
 
@@ -159,18 +174,12 @@ contract EcommerceStore {
         address owner = productIdToOwner[_productId];
         Product storage product = stores[owner][_productId];
 
-        bytes memory bytesInfo = abi.encodePacked(_idealPrice, _secret);
-        bytes32 bidId = keccak256(bytesInfo);
+        bytes32 commitHash = computeCommitHash(_productId, msg.sender, _idealPrice, _secret);
 
-        //mapping(address => mapping(bytes32 => Bid)) bids;
+        Bid storage currBid = product.bids[msg.sender][commitHash];
 
-        //一个人可以对同一个商品竞标多次，揭标的时候也要揭标多次, storage类型
-        Bid storage currBid = product.bids[msg.sender][bidId];
-
-        // require(now > product.auctionStartTime);
         require(!currBid.isRevealed);
         require(currBid.bidder != address(0));
-        //说明找到了这个标
 
         currBid.isRevealed = true;
 
@@ -207,7 +216,7 @@ contract EcommerceStore {
             refund = confusePrice;
         }
 
-        emit revealEvent(_productId, bidId, confusePrice, currBid.price, refund);
+        emit revealEvent(_productId, commitHash, idealPrice, currBid.price, refund);
 
         if (refund > 0) {
             _transfer(msg.sender, refund);

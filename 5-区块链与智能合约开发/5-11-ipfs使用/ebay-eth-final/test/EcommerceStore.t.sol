@@ -32,11 +32,14 @@ contract EcommerceStoreTest is Test {
         vm.deal(buyer, 5 ether);
         vm.deal(bidderB, 5 ether);
 
+        bytes32 commitA = store.computeCommitHash(1, buyer, 3 ether, "secret-a");
+        bytes32 commitB = store.computeCommitHash(1, bidderB, 2 ether, "secret-b");
+
         vm.prank(buyer);
-        store.bid{value: 3 ether}(1, 3 ether, "secret-a");
+        store.bid{value: 3 ether}(1, commitA);
 
         vm.prank(bidderB);
-        store.bid{value: 2 ether}(1, 2 ether, "secret-b");
+        store.bid{value: 2 ether}(1, commitB);
 
         vm.prank(buyer);
         store.revealBid(1, 3 ether, "secret-a");
@@ -61,5 +64,37 @@ contract EcommerceStoreTest is Test {
 
         Escrow escrow = Escrow(payable(store.productToEscrow(1)));
         assertEq(escrow.getBalance(), 2 ether);
+    }
+
+    function testRevealFailsWithWrongSecret() public {
+        vm.prank(seller);
+        store.addProductToStore("shirt", "clothes", "img", "desc", 1, 2, 1 ether, 0);
+
+        vm.deal(buyer, 5 ether);
+        bytes32 commit = store.computeCommitHash(1, buyer, 3 ether, "secret-a");
+
+        vm.prank(buyer);
+        store.bid{value: 3 ether}(1, commit);
+
+        vm.prank(buyer);
+        vm.expectRevert();
+        store.revealBid(1, 3 ether, "wrong-secret");
+    }
+
+    function testCommitCannotReplayOnAnotherProduct() public {
+        vm.startPrank(seller);
+        store.addProductToStore("shirt", "clothes", "img", "desc", 1, 2, 1 ether, 0);
+        store.addProductToStore("shoes", "clothes", "img2", "desc2", 1, 2, 1 ether, 0);
+        vm.stopPrank();
+
+        vm.deal(buyer, 5 ether);
+        bytes32 commitForProduct1 = store.computeCommitHash(1, buyer, 3 ether, "secret-a");
+
+        vm.prank(buyer);
+        store.bid{value: 3 ether}(1, commitForProduct1);
+
+        vm.prank(buyer);
+        vm.expectRevert();
+        store.revealBid(2, 3 ether, "secret-a");
     }
 }

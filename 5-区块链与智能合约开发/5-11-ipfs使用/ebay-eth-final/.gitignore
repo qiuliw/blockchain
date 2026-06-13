@@ -1,5 +1,7 @@
 cache/
 out/
 broadcast/
+node_modules/
+frontend/dist/
 .env
 .env.local
