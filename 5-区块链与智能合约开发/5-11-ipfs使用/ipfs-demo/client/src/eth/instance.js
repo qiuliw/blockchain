@@ -1,7 +1,7 @@
 import { Web3 } from 'web3'
 
 // 部署后填入 forge script 输出的合约地址
-export const storageAddress = ''
+export const storageAddress = process.env.REACT_APP_CONTRACT_ADDRESS || ''
 
 export const storageAbi = [
   {
@@ -22,7 +22,7 @@ export const storageAbi = [
 
 export function createStorageContract(web3) {
   if (!storageAddress) {
-    throw new Error('请先在 src/eth/instance.js 设置 storageAddress（forge script 部署后获取）')
+    throw new Error('请在 client/.env 中设置 REACT_APP_CONTRACT_ADDRESS（forge script 部署后获取）')
   }
   return new web3.eth.Contract(storageAbi, storageAddress)
 }

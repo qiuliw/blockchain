@@ -6,13 +6,12 @@ import ipfsAPI from 'ipfs-api'
 import $ from 'jquery'
 
 const ipfs = ipfsAPI({
-    ip: 'localhost',
-    port: '5001',
-    protocol: 'http'
+    ip: process.env.IPFS_HOST,
+    port: process.env.IPFS_API_PORT,
+    protocol: process.env.IPFS_PROTOCOL,
 })
 
-// 部署后填入 forge script 输出的合约地址
-const storeAddress = ''
+const storeAddress = process.env.CONTRACT_ADDRESS
 
 let ecommerceStoreInstance
 
@@ -22,7 +21,7 @@ const App = {
         console.log('init !!!!!')
 
         if (!storeAddress) {
-            throw new Error('请先在 app/scripts/index.js 设置 storeAddress')
+            throw new Error('请在项目根目录 .env 中设置 CONTRACT_ADDRESS（forge script 部署后获取）')
         }
 
         ecommerceStoreInstance = new window.web3.eth.Contract(abi, storeAddress)
@@ -317,8 +316,7 @@ function renderProducts() {
                 // 3. 每个产品创建一个node，填充数据，
                 // console.table(productInfo)
                 let node = $('<div/>')
-                // 图片显示,我的ipfs默认端口为8848，可以去home目录下.ipfs/config中修改
-                node.append(`<img src="http://localhost:8848/ipfs/${imageLink}" width="150px"/>`)
+                node.append(`<img src="${process.env.IPFS_GATEWAY_URL}/ipfs/${imageLink}" width="150px"/>`)
                 // 名字
                 node.append(`<div>${name}</div>`)
                 // 类别
@@ -372,7 +370,7 @@ function renderProductDetail(id) {
 
         console.log('productInfo : ', productInfo)
         //显示图片
-        $('#product-image').append(`<img src="http://localhost:8848/ipfs/${imageLink}" width="400px"/>`)
+        $('#product-image').append(`<img src="${process.env.IPFS_GATEWAY_URL}/ipfs/${imageLink}" width="400px"/>`)
 
         //显示文本
         let content = ''
@@ -486,7 +484,7 @@ window.addEventListener('load', function () {
         window.web3 = new Web3(window.ethereum)
     } else {
         console.warn('local web3 found!')
-        window.web3 = new Web3('http://127.0.0.1:8545')
+        window.web3 = new Web3(process.env.RPC_URL)
     }
 
     App.start()

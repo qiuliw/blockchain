@@ -6,7 +6,11 @@ import './App.css'
 
 import ipfsAPI from 'ipfs-api'
 
-let ipfs = ipfsAPI('localhost', '5001', {protocol: 'http'})
+let ipfs = ipfsAPI(
+    process.env.REACT_APP_IPFS_HOST || '127.0.0.1',
+    process.env.REACT_APP_IPFS_API_PORT || '5001',
+    {protocol: process.env.REACT_APP_IPFS_PROTOCOL || 'http'}
+)
 
 class App extends Component {
     state = {
@@ -118,8 +122,8 @@ class App extends Component {
                     {
                         response &&
                         <div>
-                            浏览器访问结果:{"http://localhost:8080/ipfs/" + response}
-                            <img src={"http://localhost:8080/ipfs/" + response}/>
+                            浏览器访问结果:{`${process.env.REACT_APP_IPFS_GATEWAY_URL || 'http://127.0.0.1:8848'}/ipfs/` + response}
+                            <img src={`${process.env.REACT_APP_IPFS_GATEWAY_URL || 'http://127.0.0.1:8848'}/ipfs/${response}`}/>
                         </div>
                     }
                 </div>

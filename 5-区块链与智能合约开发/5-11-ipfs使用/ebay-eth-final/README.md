@@ -10,6 +10,20 @@ day12 完整版：在 ebay-eth 基础上增加 IPFS 图片/描述上传。
 - MetaMask
 - IPFS daemon（5001，上传商品图片时需要）
 
+## 环境配置
+
+```bash
+cp .env.example .env
+# 部署后把合约地址写入 .env 的 CONTRACT_ADDRESS
+```
+
+| 变量 | 说明 |
+|------|------|
+| `RPC_URL` | Anvil RPC，默认 `http://127.0.0.1:8545` |
+| `DEPLOYER_ADDRESS` | 部署账户，默认 Anvil 第一个账户 |
+| `CONTRACT_ADDRESS` | `forge script` 部署后的合约地址 |
+| `IPFS_*` | IPFS API 与网关地址 |
+
 ## 合约（Solidity 0.8.26）
 
 ```bash
@@ -17,11 +31,10 @@ cd ebay-eth-final
 forge install foundry-rs/forge-std
 
 forge test
-npm run build:contract    # forge build + 生成 app/eth/abi.json
+npm run build:contract
 
 anvil
 npm run deploy:local
-# 将部署地址写入 app/scripts/index.js 的 storeAddress
 ```
 
 ## 前端

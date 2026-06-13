@@ -6,7 +6,7 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test:contract": "forge test",
-    "deploy:local": "forge script script/DeployFundingFactory.s.sol:DeployFundingFactory --rpc-url http://127.0.0.1:8545 --broadcast"
+    "deploy:local": "dotenv -- forge script script/DeployFundingFactory.s.sol:DeployFundingFactory --rpc-url $RPC_URL --broadcast --sender $DEPLOYER_ADDRESS --unlocked"
   },
   "dependencies": {
     "react": "^18.2.0",
@@ -15,6 +15,9 @@
     "semantic-ui-css": "^2.5.0",
     "semantic-ui-react": "^2.1.5",
     "web3": "4.16.0"
+  },
+  "devDependencies": {
+    "dotenv-cli": "^7.4.2"
   },
   "browserslist": {
     "production": [

@@ -5,9 +5,12 @@
   "scripts": {
     "test:contract": "forge test",
     "build:contract": "forge build",
-    "deploy:local": "forge script script/DeploySimpleStorage.s.sol:DeploySimpleStorage --rpc-url http://127.0.0.1:8545 --broadcast",
+    "deploy:local": "dotenv -- forge script script/DeploySimpleStorage.s.sol:DeploySimpleStorage --rpc-url $RPC_URL --broadcast --sender $DEPLOYER_ADDRESS --unlocked",
     "client:install": "npm install --prefix client --ignore-scripts",
     "client:start": "npm start --prefix client",
-    "ipfs:test": "node client/01-ipfs-api-test.js"
+    "ipfs:test": "dotenv -- node client/01-ipfs-api-test.js"
+  },
+  "devDependencies": {
+    "dotenv-cli": "^7.4.2"
   }
 }

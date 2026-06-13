@@ -1,5 +1,6 @@
 const path = require('path')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
+const {defineEnvPlugin} = require('../../scripts/webpack-env')
 
 module.exports = {
     entry: './app/scripts/index.js',
@@ -9,7 +10,7 @@ module.exports = {
         filename: 'app.js'
     },
     plugins: [
-        // Copy our app's index.html to the build folder.
+        defineEnvPlugin(),
         new CopyWebpackPlugin([
             {from: './app/index.html', to: 'index.html'}
         ])
@@ -30,4 +31,3 @@ module.exports = {
         ]
     }
 }
-

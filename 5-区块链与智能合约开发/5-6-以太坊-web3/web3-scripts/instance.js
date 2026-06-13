@@ -1,13 +1,12 @@
 //获取合约实例，导出去
 
+require('dotenv').config()
+
 const { Web3 } = require('web3')
 const fs = require('fs')
 const path = require('path')
 
-//1. 引入web3
-//2. new 一个web3实例
-const web3 = new Web3('http://127.0.0.1:8545')
-//3. 设置网络
+const web3 = new Web3(process.env.RPC_URL || 'http://127.0.0.1:8545')
 
 const artifactPath = path.join(__dirname, 'out/SimpleStorage.sol/SimpleStorage.json')
 if (!fs.existsSync(artifactPath)) {
@@ -15,11 +14,11 @@ if (!fs.existsSync(artifactPath)) {
 }
 const { abi } = JSON.parse(fs.readFileSync(artifactPath, 'utf8'))
 
-// 部署后填入 forge script 输出的合约地址
-const address = ''
+// 部署后填入 .env 的 CONTRACT_ADDRESS
+const address = process.env.CONTRACT_ADDRESS || ''
 
 if (!address) {
-  throw new Error('请先在 instance.js 中设置合约地址（forge script 部署后获取）')
+  throw new Error('请在 .env 中设置 CONTRACT_ADDRESS（forge script 部署后获取）')
 }
 
 //此处abi已经json对象，不需要进行parse动作

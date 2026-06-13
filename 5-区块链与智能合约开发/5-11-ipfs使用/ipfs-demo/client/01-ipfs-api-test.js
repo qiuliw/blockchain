@@ -1,6 +1,12 @@
+require('dotenv').config()
+
 let ipfsAPI = require('ipfs-api')
 
-let ipfs = ipfsAPI('localhost', '5001', {protocol: 'http'})
+let ipfs = ipfsAPI(
+    process.env.IPFS_HOST || '127.0.0.1',
+    process.env.IPFS_API_PORT || '5001',
+    {protocol: process.env.IPFS_PROTOCOL || 'http'}
+)
 
 //启动ipfs daemon
 

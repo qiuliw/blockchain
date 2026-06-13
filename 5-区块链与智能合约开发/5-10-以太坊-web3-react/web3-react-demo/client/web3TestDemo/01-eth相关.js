@@ -1,6 +1,7 @@
+require('dotenv').config()
 const { Web3 } = require('web3')
 
-const web3 = new Web3('http://127.0.0.1:8545')
+const web3 = new Web3(process.env.RPC_URL || 'http://127.0.0.1:8545')
 
 console.log('version :', web3.version)
 

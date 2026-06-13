@@ -6,6 +6,9 @@
 
 - [web3.js 知识点](./docs/web3.js知识点.md) — web3.js 4.x
 - [Foundry 知识点](./docs/Foundry知识点.md) — 合约编译、测试、部署
+- [IPFS 知识点](./docs/IPFS知识点.md) — 分布式存储与链上哈希结合
+
+各 DApp 项目通过 `.env` 配置 RPC、合约地址、IPFS 等环境变量，复制项目内 `.env.example` 为 `.env` 后按需修改。
 
 ## 项目索引
 

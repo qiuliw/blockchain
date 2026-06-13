@@ -25,7 +25,7 @@ const getWeb3 = () => {
             }
             // Fallback to localhost; Anvil default port
             else {
-                const web3 = new Web3('http://127.0.0.1:8545')
+                const web3 = new Web3(process.env.REACT_APP_RPC_URL || 'http://127.0.0.1:8545')
                 console.log('No web3 instance injected, using Local web3.')
                 resolve(web3)
             }

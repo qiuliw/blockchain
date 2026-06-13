@@ -1,5 +1,11 @@
 *.db
 
+# Environment
+.env
+.env.local
+.env.*
+!.env.example
+
 # Node
 **/node_modules/
 
@@ -9,8 +15,3 @@ build/
 **/cache/
 **/broadcast/
 **/foundry-out/
-
-# Environment
-.env
-.env.*
-!.env.example

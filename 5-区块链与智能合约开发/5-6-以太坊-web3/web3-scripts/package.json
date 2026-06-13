@@ -5,11 +5,15 @@
   "scripts": {
     "test:contract": "forge test",
     "build:contract": "forge build",
-    "deploy:local": "forge script script/DeploySimpleStorage.s.sol:DeploySimpleStorage --rpc-url http://127.0.0.1:8545 --broadcast",
-    "instance": "node instance.js",
-    "interact": "node interaction.js"
+    "deploy:local": "dotenv -- forge script script/DeploySimpleStorage.s.sol:DeploySimpleStorage --rpc-url $RPC_URL --broadcast --sender $DEPLOYER_ADDRESS --unlocked",
+    "instance": "dotenv -- node instance.js",
+    "interact": "dotenv -- node interaction.js"
   },
   "dependencies": {
+    "dotenv": "^16.4.5",
     "web3": "4.16.0"
+  },
+  "devDependencies": {
+    "dotenv-cli": "^7.4.2"
   }
 }
