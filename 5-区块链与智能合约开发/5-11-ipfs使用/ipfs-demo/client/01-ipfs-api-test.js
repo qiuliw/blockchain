@@ -10,7 +10,6 @@ let ipfs = ipfsAPI(
 
 //启动ipfs daemon
 
-
 let ipfsTest = async () => {
     let content = ipfs.types.Buffer.from('ABC');
     let results = await ipfs.files.add(content);
